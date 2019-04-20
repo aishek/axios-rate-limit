@@ -27,7 +27,7 @@ it('delay requests more than maxRequests', async function () {
   for (var i = 0; i < totalRequests; i++) {
     requests.push(http.get('/users').then(onSuccess))
   }
-  await delay(10)
+  await delay(90)
   expect(onSuccess.callCount).toEqual(maxRequests)
 
   await Promise.all(requests)

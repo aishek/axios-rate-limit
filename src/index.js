@@ -72,4 +72,6 @@ function axiosRateLimit (axios, options) {
   return axios
 }
 
-module.exports.default = axiosRateLimit
+exports.__esModule = true
+exports.name = 'axiosRateLimit'
+exports.default = axiosRateLimit

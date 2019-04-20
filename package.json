@@ -1,0 +1,90 @@
+{
+  "name": "axios-rate-limit",
+  "description": "Rate limit for axios.",
+  "version": "0.0.1",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aishek/axios-rate-limit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aishek/axios-rate-limit.git"
+  },
+  "homepage": "https://github.com/aishek/axios-rate-limit#readme",
+  "devDependencies": {
+    "@logux/eslint-config": "^28.1.0",
+    "axios": "^0.18.0",
+    "eslint": "^5.16.0",
+    "eslint-ci": "^1.0.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-es5": "^1.3.1",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-import-helpers": "^0.1.4",
+    "eslint-plugin-jest": "^22.4.1",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-promise": "^4.1.1",
+    "eslint-plugin-security": "^1.4.0",
+    "eslint-plugin-standard": "^4.0.0",
+    "husky": "^1.3.1",
+    "jest": "^24.7.1",
+    "lint-staged": "^8.1.5",
+    "sinon": "^7.3.2",
+    "yaspeller-ci": "^1.0.0"
+  },
+  "peerDependencies": {
+    "axios": "*"
+  },
+  "main": "src/index.js",
+  "files": [
+    "src/index.js"
+  ],
+  "scripts": {
+    "watch": "yarn jest --watch",
+    "test": "jest --forceExit --runInBand --coverage --detectOpenHandles && yarn lint && yarn spell",
+    "lint": "eslint-ci src/*.js __tests__/*.js",
+    "spell": "yaspeller-ci *.md"
+  },
+  "jest": {
+    "verbose": true,
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "moduleDirectories": [
+      "node_modules"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  },
+  "eslintConfig": {
+    "plugins": [
+      "jest"
+    ],
+    "extends": "@logux/eslint-config/browser",
+    "env": {
+      "jest/globals": true
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.md": "yaspeller-ci",
+    "*.js": "eslint"
+  },
+  "keywords": [
+    "axios",
+    "rate",
+    "limit"
+  ],
+  "author": "Alexandr Borisov (aishek@gmail.com)",
+  "yaspeller": {
+    "lang": "en",
+    "dictionary": [
+      "Cifronomika",
+      "axios"
+    ]
+  }
+}

@@ -20,9 +20,9 @@ import rateLimit from 'axios-rate-limit';
 
 // sets max 2 requests per 1 second, other will be delayed
 const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000 });
-http.get('https://example.com/api/v1/users.json') // will perform immediately
-http.get('https://example.com/api/v1/users.json') // will perform immediately
-http.get('https://example.com/api/v1/users.json') // will perform after 1 second from the first one
+http.get('https://example.com/api/v1/users.json?page=1') // will perform immediately
+http.get('https://example.com/api/v1/users.json?page=2') // will perform immediately
+http.get('https://example.com/api/v1/users.json?page=3') // will perform after 1 second from the first one
 ```
 
 ## A bit of advertising :-)

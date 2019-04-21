@@ -1,7 +1,7 @@
 {
   "name": "axios-rate-limit",
   "description": "Rate limit for axios.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/aishek/axios-rate-limit/issues"

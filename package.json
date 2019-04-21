@@ -87,7 +87,9 @@
     "lang": "en",
     "dictionary": [
       "Cifronomika",
-      "axios"
+      "axios",
+      "Versioning",
+      "jsdoc"
     ]
   }
 }

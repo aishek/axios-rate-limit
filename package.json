@@ -63,6 +63,9 @@
     "extends": "@logux/eslint-config/browser",
     "env": {
       "jest/globals": true
+    },
+    "rules": {
+      "max-len": ["error", { "ignoreComments": true }]
     }
   },
   "husky": {

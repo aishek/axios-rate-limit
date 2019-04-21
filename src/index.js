@@ -62,6 +62,25 @@ AxiosRateLimit.prototype.shift = function () {
   this.timeslotRequests += 1
 }
 
+/**
+ * Apply rate limit to axios instance.
+ *
+ * @example
+ *   import axios from 'axios';
+ *   import rateLimit from 'axios-rate-limit';
+ *
+ *   // sets max 2 requests per 1 second, other will be delayed
+ *   const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000 });
+ *   http.get('https://example.com/api/v1/users.json?page=1') // will perform immediately
+ *   http.get('https://example.com/api/v1/users.json?page=2') // will perform immediately
+ *   http.get('https://example.com/api/v1/users.json?page=3') // will perform after 1 second from the first one
+ *
+ * @param {Object} axios axios instance
+ * @param {Object} options options for rate limit.
+ * @param {Number} options.maxRequests max requests to perform concurrently in given amount of time.
+ * @param {Number} options.perMilliseconds amount of time to limit concurrent requests.
+ * @returns {Object} axios instance with interceptors added
+ */
 function axiosRateLimit (axios, options) {
   new AxiosRateLimit({
     maxRequests: options.maxRequests,

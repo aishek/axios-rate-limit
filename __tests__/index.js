@@ -60,3 +60,21 @@ it('not delay requests less than maxRequests', async function () {
   expect(onSuccess.callCount).toEqual(totalRequests)
   expect(end - start).toBeLessThan(perMilliseconds)
 })
+
+it('throws an error', async function () {
+  var maxRequests = 2
+  var perMilliseconds = 1000
+  function adapter () { return Promise.reject(new Error('fail')) }
+
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    { maxRequests: maxRequests, perMilliseconds: perMilliseconds }
+  )
+
+  expect.assertions(1)
+  try {
+    await http.get('/users')
+  } catch (error) {
+    expect(error.message).toEqual('fail')
+  }
+})

@@ -1,7 +1,7 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unpublished
+## 1.0.0
 * Changed exports to classic NodeJS modules (see https://github.com/aishek/axios-rate-limit/issues/3)
 
 ## 0.0.4

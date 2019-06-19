@@ -1,7 +1,7 @@
 var axios = require('axios')
 var sinon = require('sinon')
 
-var axiosRateLimit = require('../src/index').default
+var axiosRateLimit = require('../src/index')
 
 function delay (milliseconds) {
   return new Promise(function (resolve) {

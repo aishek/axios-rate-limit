@@ -10,34 +10,34 @@ function AxiosRateLimit (options) {
     response: null
   }
 
-  this.requestHandler = this.requestHandler.bind(this)
-  this.responseHandler = this.responseHandler.bind(this)
+  this.handleRequest = this.handleRequest.bind(this)
+  this.handleResponse = this.handleResponse.bind(this)
 
   this.enable(options.axios)
 }
 
 AxiosRateLimit.prototype.enable = function (axios) {
   this.interceptors.request = axios.interceptors.request.use(
-    this.requestHandler,
+    this.handleRequest,
     function (error) {
       return Promise.reject(error)
     }
   )
   this.interceptors.response = axios.interceptors.response.use(
-    this.responseHandler,
+    this.handleResponse,
     function (error) {
       return Promise.reject(error)
     }
   )
 }
 
-AxiosRateLimit.prototype.requestHandler = function (request) {
+AxiosRateLimit.prototype.handleRequest = function (request) {
   return new Promise(function (resolver) {
     this.push({ request: request, resolver: resolver })
   }.bind(this))
 }
 
-AxiosRateLimit.prototype.responseHandler = function (response) {
+AxiosRateLimit.prototype.handleResponse = function (response) {
   this.shift()
   return response
 }

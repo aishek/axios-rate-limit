@@ -17,17 +17,17 @@ function AxiosRateLimit (options) {
 }
 
 AxiosRateLimit.prototype.enable = function (axios) {
+  function handleError (error) {
+    return Promise.reject(error)
+  }
+
   this.interceptors.request = axios.interceptors.request.use(
     this.handleRequest,
-    function (error) {
-      return Promise.reject(error)
-    }
+    handleError
   )
   this.interceptors.response = axios.interceptors.response.use(
     this.handleResponse,
-    function (error) {
-      return Promise.reject(error)
-    }
+    handleError
   )
 }
 

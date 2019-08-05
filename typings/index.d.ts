@@ -1,6 +1,6 @@
 import { AxiosInstance } from 'axios';
 
-interface RateLimitedAxiosInstance extends AxiosInstance {}
+export interface RateLimitedAxiosInstance extends AxiosInstance {}
 
 declare function axiosRateLimit(
     axiosInstance: AxiosInstance,

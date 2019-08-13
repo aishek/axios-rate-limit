@@ -67,6 +67,16 @@ AxiosRateLimit.prototype.shift = function () {
   this.timeslotRequests += 1
 }
 
+AxiosRateLimit.prototype.updateRateLimitOptions = function (options) {
+  if ('maxRequests' in options) {
+    this.maxRequests = options.maxRequests
+  }
+
+  if ('perMilliseconds' in options) {
+    this.perMilliseconds = options.perMilliseconds
+  }
+}
+
 /**
  * Apply rate limit to axios instance.
  *
@@ -87,11 +97,14 @@ AxiosRateLimit.prototype.shift = function () {
  * @returns {Object} axios instance with interceptors added
  */
 function axiosRateLimit (axios, options) {
-  new AxiosRateLimit({
+  var instance = new AxiosRateLimit({
     maxRequests: options.maxRequests,
     perMilliseconds: options.perMilliseconds,
     axios: axios
   })
+
+  axios.updateOptions = AxiosRateLimit
+    .prototype.updateRateLimitOptions.bind(instance)
 
   return axios
 }

@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+* Fixed TypeScript typings bundle
+
 ## 1.1.0
 * Added TypeScript typings (see https://github.com/aishek/axios-rate-limit/pull/9)
 

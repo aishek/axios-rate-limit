@@ -62,7 +62,7 @@ AxiosRateLimit.prototype.shift = function () {
     setTimeout(function () {
       this.timeslotRequests = 0
       this.shift()
-    }.bind(this), this.perMilliseconds)
+    }.bind(this), this.perMilliseconds).unref()
   }
   this.timeslotRequests += 1
 }

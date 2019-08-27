@@ -59,13 +59,13 @@ AxiosRateLimit.prototype.shift = function () {
   queued.resolve()
 
   if (this.timeslotRequests === 0) {
-    const timeOut = setTimeout(function () {
+    var timeOut = setTimeout(function () {
       this.timeslotRequests = 0
       this.shift()
     }.bind(this), this.perMilliseconds)
     // In Node we can avoid keeping process alive unnecessarily by calling
     // unref() on timeout object. That's not available elsewhere.
-    typeof timeOut.unref === 'function' ? timeOut.unref() : null
+    if (typeof timeOut.unref === 'function') timeOut.unref()
   }
   this.timeslotRequests += 1
 }

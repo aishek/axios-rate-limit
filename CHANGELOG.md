@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+### Unreleased
+* Fixed NodeJS delayed shutdown (see https://github.com/aishek/axios-rate-limit/pull/13/files)
+
 ## 1.1.1
 * Fixed TypeScript typings bundle (see https://github.com/aishek/axios-rate-limit/pull/12/files)
 

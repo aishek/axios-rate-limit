@@ -1,7 +1,7 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-### Unreleased
+### 1.1.2
 * Fixed NodeJS delayed shutdown (see https://github.com/aishek/axios-rate-limit/pull/13/files)
 
 ## 1.1.1

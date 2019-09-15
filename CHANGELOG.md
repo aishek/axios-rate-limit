@@ -1,7 +1,10 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-### 1.1.2
+## Unreleased
+* Fixed ref/unref timeout behaviour for NodeJS (see https://github.com/aishek/axios-rate-limit/issues/16)
+
+## 1.1.2
 * Fixed NodeJS delayed shutdown (see https://github.com/aishek/axios-rate-limit/pull/13/files)
 
 ## 1.1.1

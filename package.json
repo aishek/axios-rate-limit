@@ -103,7 +103,8 @@
       "com",
       "NodeJS",
       "TypeScript",
-      "Unreleased"
+      "Unreleased",
+      "unref"
     ]
   }
 }

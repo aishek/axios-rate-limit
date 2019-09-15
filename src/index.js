@@ -53,19 +53,28 @@ AxiosRateLimit.prototype.shiftInitial = function () {
 
 AxiosRateLimit.prototype.shift = function () {
   if (!this.queue.length) return
-  if (this.timeslotRequests === this.maxRequests) return
+  if (this.timeslotRequests === this.maxRequests) {
+    if (this.timeoutId && typeof this.timeoutId.ref === 'function') {
+      this.timeoutId.ref()
+    }
+
+    return
+  }
 
   var queued = this.queue.shift()
   queued.resolve()
 
   if (this.timeslotRequests === 0) {
-    var timeoutId = setTimeout(function () {
+    this.timeoutId = setTimeout(function () {
       this.timeslotRequests = 0
       this.shift()
     }.bind(this), this.perMilliseconds)
 
-    if (typeof timeoutId.unref === 'function') timeoutId.unref()
+    if (typeof this.timeoutId.unref === 'function') {
+      if (this.queue.length === 0) this.timeoutId.unref()
+    }
   }
+
   this.timeslotRequests += 1
 }
 

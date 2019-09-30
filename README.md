@@ -19,12 +19,16 @@ import axios from 'axios';
 import rateLimit from 'axios-rate-limit';
 
 // sets max 2 requests per 1 second, other will be delayed
-const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000 });
+const options = { maxRequests: 2, perMilliseconds: 1000 }
+const http = rateLimit(axios.create(), options);
 http.get('https://example.com/api/v1/users.json?page=1') // will perform immediately
 http.get('https://example.com/api/v1/users.json?page=2') // will perform immediately
 http.get('https://example.com/api/v1/users.json?page=3') // will perform after 1 second from the first one
+
+// options hot-reloading also available
+options.maxRequests = 5 // will be applied after 1 second from the first request
 ```
 
 ## A bit of advertising :-)
 
-Since 2010 lead my own software development company [Cifronomika](http://cifronomika.com/). We doing Ruby on Rails and JavaScript development. Feel free to contact
+Since 2010 run my own software development company [Cifronomika](http://cifronomika.com/). We doing Ruby on Rails and JavaScript development. Feel free to contact

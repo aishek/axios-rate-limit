@@ -1,6 +1,5 @@
 function AxiosRateLimit (options) {
-  this.maxRequests = options.maxRequests
-  this.perMilliseconds = options.perMilliseconds
+  this.options = options
 
   this.queue = []
   this.timeslotRequests = 0
@@ -53,7 +52,7 @@ AxiosRateLimit.prototype.shiftInitial = function () {
 
 AxiosRateLimit.prototype.shift = function () {
   if (!this.queue.length) return
-  if (this.timeslotRequests === this.maxRequests) {
+  if (this.timeslotRequests === this.options.maxRequests) {
     if (this.timeoutId && typeof this.timeoutId.ref === 'function') {
       this.timeoutId.ref()
     }
@@ -68,7 +67,7 @@ AxiosRateLimit.prototype.shift = function () {
     this.timeoutId = setTimeout(function () {
       this.timeslotRequests = 0
       this.shift()
-    }.bind(this), this.perMilliseconds)
+    }.bind(this), this.options.perMilliseconds)
 
     if (typeof this.timeoutId.unref === 'function') {
       if (this.queue.length === 0) this.timeoutId.unref()
@@ -92,7 +91,7 @@ AxiosRateLimit.prototype.shift = function () {
  *   http.get('https://example.com/api/v1/users.json?page=3') // will perform after 1 second from the first one
  *
  * @param {Object} axios axios instance
- * @param {Object} options options for rate limit.
+ * @param {Object} options options for rate limit, available for live update
  * @param {Number} options.maxRequests max requests to perform concurrently in given amount of time.
  * @param {Number} options.perMilliseconds amount of time to limit concurrent requests.
  * @returns {Object} axios instance with interceptors added

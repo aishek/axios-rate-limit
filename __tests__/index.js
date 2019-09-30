@@ -78,3 +78,45 @@ it('throws an error', async function () {
     expect(error.message).toEqual('fail')
   }
 })
+
+it('support dynamic options', async function () {
+  var options = { maxRequests: 2, perMilliseconds: 100 }
+  function adapter (config) { return Promise.resolve(config) }
+
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    options
+  )
+
+  var onSuccess = sinon.spy()
+
+  var requests = []
+  var start = Date.now()
+  for (var i = 0; i < 3; i++) {
+    requests.push(http.get('/users').then(onSuccess))
+  }
+  await delay(90)
+  expect(onSuccess.callCount).toEqual(2)
+
+  await Promise.all(requests)
+  var end = Date.now()
+  expect(onSuccess.callCount).toEqual(3)
+  expect(end - start).toBeGreaterThan(100)
+
+  options.maxRequests = 3
+  options.perMilliseconds = 150
+
+  onSuccess = sinon.spy()
+  requests = []
+  start = Date.now()
+  for (var z = 0; z < 4; z++) {
+    requests.push(http.get('/users').then(onSuccess))
+  }
+  await delay(140)
+  expect(onSuccess.callCount).toEqual(3)
+
+  await Promise.all(requests)
+  end = Date.now()
+  expect(onSuccess.callCount).toEqual(4)
+  expect(end - start).toBeGreaterThan(150)
+})

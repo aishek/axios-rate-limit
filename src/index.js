@@ -1,6 +1,4 @@
-function AxiosRateLimit (options) {
-  this.options = options
-
+function AxiosRateLimit (axios) {
   this.queue = []
   this.timeslotRequests = 0
 
@@ -12,7 +10,28 @@ function AxiosRateLimit (options) {
   this.handleRequest = this.handleRequest.bind(this)
   this.handleResponse = this.handleResponse.bind(this)
 
-  this.enable(options.axios)
+  this.enable(axios)
+}
+
+AxiosRateLimit.prototype.getMaxRPS = function () {
+  var perSeconds = (this.perMilliseconds / 1000)
+  return this.maxRequests / perSeconds
+}
+
+AxiosRateLimit.prototype.setMaxRPS = function (rps) {
+  this.setRateLimitOptions({
+    maxRequests: rps,
+    perMilliseconds: 1000
+  })
+}
+
+AxiosRateLimit.prototype.setRateLimitOptions = function (options) {
+  if (options.maxRPS) {
+    this.setMaxRPS(options.maxRPS)
+  } else {
+    this.perMilliseconds = options.perMilliseconds
+    this.maxRequests = options.maxRequests
+  }
 }
 
 AxiosRateLimit.prototype.enable = function (axios) {
@@ -52,7 +71,7 @@ AxiosRateLimit.prototype.shiftInitial = function () {
 
 AxiosRateLimit.prototype.shift = function () {
   if (!this.queue.length) return
-  if (this.timeslotRequests === this.options.maxRequests) {
+  if (this.timeslotRequests === this.maxRequests) {
     if (this.timeoutId && typeof this.timeoutId.ref === 'function') {
       this.timeoutId.ref()
     }
@@ -67,7 +86,7 @@ AxiosRateLimit.prototype.shift = function () {
     this.timeoutId = setTimeout(function () {
       this.timeslotRequests = 0
       this.shift()
-    }.bind(this), this.options.perMilliseconds)
+    }.bind(this), this.perMilliseconds)
 
     if (typeof this.timeoutId.unref === 'function') {
       if (this.queue.length === 0) this.timeoutId.unref()
@@ -85,10 +104,16 @@ AxiosRateLimit.prototype.shift = function () {
  *   import rateLimit from 'axios-rate-limit';
  *
  *   // sets max 2 requests per 1 second, other will be delayed
- *   const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000 });
+ *   // note maxRPS is a shorthand for perMilliseconds: 1000, and it takes precedence
+ *   // if specified both with maxRequests and perMilliseconds
+ *   const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000, maxRPS: 2 })
+*    http.getMaxRPS() // 2
  *   http.get('https://example.com/api/v1/users.json?page=1') // will perform immediately
  *   http.get('https://example.com/api/v1/users.json?page=2') // will perform immediately
  *   http.get('https://example.com/api/v1/users.json?page=3') // will perform after 1 second from the first one
+ *   http.setMaxRPS(3)
+ *   http.getMaxRPS() // 3
+ *   http.setRateLimitOptions({ maxRequests: 6, perMilliseconds: 150 }) // same options as constructor
  *
  * @param {Object} axios axios instance
  * @param {Object} options options for rate limit, available for live update
@@ -97,11 +122,13 @@ AxiosRateLimit.prototype.shift = function () {
  * @returns {Object} axios instance with interceptors added
  */
 function axiosRateLimit (axios, options) {
-  new AxiosRateLimit({
-    maxRequests: options.maxRequests,
-    perMilliseconds: options.perMilliseconds,
-    axios: axios
-  })
+  var rateLimitInstance = new AxiosRateLimit(axios)
+  rateLimitInstance.setRateLimitOptions(options)
+
+  axios.getMaxRPS = AxiosRateLimit.prototype.getMaxRPS.bind(rateLimitInstance)
+  axios.setMaxRPS = AxiosRateLimit.prototype.setMaxRPS.bind(rateLimitInstance)
+  axios.setRateLimitOptions = AxiosRateLimit.prototype.setRateLimitOptions
+    .bind(rateLimitInstance)
 
   return axios
 }

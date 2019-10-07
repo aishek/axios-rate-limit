@@ -2,7 +2,7 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
-* Add options hot reload
+* Add maxRPS options, getMaxRPS, setMaxRPS, setRateLimitOptions methods
 
 ## 1.1.3
 * Fixed ref/unref timeout behaviour for NodeJS (see https://github.com/aishek/axios-rate-limit/issues/16)

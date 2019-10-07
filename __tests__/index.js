@@ -9,33 +9,6 @@ function delay (milliseconds) {
   })
 }
 
-it('delay requests more than maxRequests', async function () {
-  var maxRequests = 2
-  var perMilliseconds = 100
-  var totalRequests = 3
-  function adapter (config) { return Promise.resolve(config) }
-
-  var http = axiosRateLimit(
-    axios.create({ adapter: adapter }),
-    { maxRequests: maxRequests, perMilliseconds: perMilliseconds }
-  )
-
-  var onSuccess = sinon.spy()
-
-  var requests = []
-  var start = Date.now()
-  for (var i = 0; i < totalRequests; i++) {
-    requests.push(http.get('/users').then(onSuccess))
-  }
-  await delay(90)
-  expect(onSuccess.callCount).toEqual(maxRequests)
-
-  await Promise.all(requests)
-  var end = Date.now()
-  expect(onSuccess.callCount).toEqual(totalRequests)
-  expect(end - start).toBeGreaterThan(perMilliseconds)
-})
-
 it('not delay requests less than maxRequests', async function () {
   var maxRequests = 5
   var perMilliseconds = 1000
@@ -44,7 +17,7 @@ it('not delay requests less than maxRequests', async function () {
 
   var http = axiosRateLimit(
     axios.create({ adapter: adapter }),
-    { maxRequests: maxRequests, perMilliseconds: perMilliseconds }
+    { maxRPS: maxRequests }
   )
 
   var onSuccess = sinon.spy()
@@ -80,13 +53,14 @@ it('throws an error', async function () {
 })
 
 it('support dynamic options', async function () {
-  var options = { maxRequests: 2, perMilliseconds: 100 }
   function adapter (config) { return Promise.resolve(config) }
 
+  // check constructor options
   var http = axiosRateLimit(
     axios.create({ adapter: adapter }),
-    options
+    { maxRequests: 2, perMilliseconds: 100 }
   )
+  expect(http.getMaxRPS()).toEqual(20)
 
   var onSuccess = sinon.spy()
 
@@ -102,9 +76,31 @@ it('support dynamic options', async function () {
   var end = Date.now()
   expect(onSuccess.callCount).toEqual(3)
   expect(end - start).toBeGreaterThan(100)
+  await delay(110)
 
-  options.maxRequests = 3
-  options.perMilliseconds = 150
+  // check setRateLimitOptions
+  http.setRateLimitOptions({ maxRequests: 3, perMilliseconds: 200 })
+  expect(http.getMaxRPS()).toEqual(15)
+
+  onSuccess = sinon.spy()
+  requests = []
+  start = Date.now()
+  for (var x = 0; x < 4; x++) {
+    requests.push(http.get('/users').then(onSuccess))
+  }
+  await delay(190)
+  end = Date.now()
+  expect(onSuccess.callCount).toEqual(3)
+
+  await Promise.all(requests)
+  end = Date.now()
+  expect(onSuccess.callCount).toEqual(4)
+  expect(end - start).toBeGreaterThan(200)
+  await delay(210)
+
+  // check setMaxRPS
+  http.setMaxRPS(3)
+  expect(http.getMaxRPS()).toEqual(3)
 
   onSuccess = sinon.spy()
   requests = []
@@ -112,11 +108,12 @@ it('support dynamic options', async function () {
   for (var z = 0; z < 4; z++) {
     requests.push(http.get('/users').then(onSuccess))
   }
-  await delay(140)
+  await delay(990)
+  end = Date.now()
   expect(onSuccess.callCount).toEqual(3)
 
   await Promise.all(requests)
   end = Date.now()
   expect(onSuccess.callCount).toEqual(4)
-  expect(end - start).toBeGreaterThan(150)
+  expect(end - start).toBeGreaterThan(1000)
 })

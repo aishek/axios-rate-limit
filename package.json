@@ -104,7 +104,11 @@
       "NodeJS",
       "TypeScript",
       "Unreleased",
-      "unref"
+      "unref",
+      "maxRPS",
+      "setMaxRPS",
+      "getMaxRPS",
+      "setRateLimitOptions"
     ]
   }
 }

@@ -1,7 +1,7 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 1.2.0
 * Add maxRPS options, getMaxRPS, setMaxRPS, setRateLimitOptions methods
 
 ## 1.1.3

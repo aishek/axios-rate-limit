@@ -7,4 +7,4 @@ declare function axiosRateLimit(
     options: { maxRequests: number, perMilliseconds: number },
 ): RateLimitedAxiosInstance;
 
-export default axiosRateLimit;
+export = axiosRateLimit;

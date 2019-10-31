@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.1
+* Fix TypeScript imports (see https://github.com/aishek/axios-rate-limit/pull/19/files)
+
 ## 1.2.0
 * Add maxRPS options, getMaxRPS, setMaxRPS, setRateLimitOptions methods
 

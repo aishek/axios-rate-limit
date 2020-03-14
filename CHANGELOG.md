@@ -2,6 +2,7 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+* Upgrade acorn to 5.7.4
 * Upgrade lodash to 4.17.19
 
 ## 1.2.1

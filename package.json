@@ -108,7 +108,8 @@
       "maxRPS",
       "setMaxRPS",
       "getMaxRPS",
-      "setRateLimitOptions"
+      "setRateLimitOptions",
+      "lodash"
     ]
   }
 }

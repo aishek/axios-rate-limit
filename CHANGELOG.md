@@ -1,7 +1,7 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 1.3.0
 * Add TypeScript typings (see https://github.com/aishek/axios-rate-limit/pull/23)
 * Upgrade handlebars to 4.5.3
 * Upgrade acorn to 5.7.4

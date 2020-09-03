@@ -33,6 +33,8 @@ http.getMaxRPS() // 3
 http.setRateLimitOptions({ maxRequests: 6, perMilliseconds: 150 }) // same options as constructor
 ```
 
-## A bit of advertising :-)
+## Credits
 
-Since 2010 run my own software development company [Cifronomika](http://cifronomika.com/). We doing Ruby on Rails and JavaScript development. Feel free to contact
+Sponsored by [JetRockets](http://www.jetrockets.pro).
+
+<img src="https://media.jetrockets.pro/jetrockets-white.png" width="250" alt="JetRockets">

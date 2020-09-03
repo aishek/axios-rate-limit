@@ -37,4 +37,4 @@ http.setRateLimitOptions({ maxRequests: 6, perMilliseconds: 150 }) // same optio
 
 Sponsored by [JetRockets](http://www.jetrockets.pro).
 
-<img src="https://media.jetrockets.pro/jetrockets-white.png" width="250" alt="JetRockets">
+<img src="https://media.jetrockets.pro/jetrockets-white.svg" width="250" alt="JetRockets">

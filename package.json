@@ -109,7 +109,8 @@
       "setMaxRPS",
       "getMaxRPS",
       "setRateLimitOptions",
-      "lodash"
+      "lodash",
+      "JetRockets"
     ]
   }
 }

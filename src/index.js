@@ -123,7 +123,10 @@ AxiosRateLimit.prototype.shift = function () {
  */
 function axiosRateLimit (axios, options) {
   var rateLimitInstance = new AxiosRateLimit(axios)
+
   rateLimitInstance.setRateLimitOptions(options)
+
+  axios.rateLimitInstance = rateLimitInstance
 
   axios.getMaxRPS = AxiosRateLimit.prototype.getMaxRPS.bind(rateLimitInstance)
   axios.setMaxRPS = AxiosRateLimit.prototype.setMaxRPS.bind(rateLimitInstance)

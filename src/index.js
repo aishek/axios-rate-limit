@@ -1,5 +1,7 @@
 function AxiosRateLimit (axios) {
   this.queue = []
+  this.priorityUrls = []
+
   this.timeslotRequests = 0
 
   this.interceptors = {
@@ -26,6 +28,10 @@ AxiosRateLimit.prototype.setMaxRPS = function (rps) {
 }
 
 AxiosRateLimit.prototype.setRateLimitOptions = function (options) {
+  if (options.priorityUrls && Array.isArray(options.priorityUrls)) {
+    this.priorityUrls = options.priorityUrls
+  }
+
   if (options.maxRPS) {
     this.setMaxRPS(options.maxRPS)
   } else {
@@ -52,13 +58,24 @@ AxiosRateLimit.prototype.enable = function (axios) {
 
 AxiosRateLimit.prototype.handleRequest = function (request) {
   return new Promise(function (resolve) {
-    this.push({ resolve: function () { resolve(request) } })
+    const handler = { resolve: function () { resolve(request) } }
+
+    if (this.priorityUrls.length && this.priorityUrls.includes(request.url)) {
+      this.unshift(handler)
+    } else {
+      this.push(handler)
+    }
   }.bind(this))
 }
 
 AxiosRateLimit.prototype.handleResponse = function (response) {
   this.shift()
   return response
+}
+
+AxiosRateLimit.prototype.unshift = function (requestHandler) {
+  this.queue.push(requestHandler)
+  this.shiftInitial()
 }
 
 AxiosRateLimit.prototype.push = function (requestHandler) {

@@ -74,7 +74,7 @@ AxiosRateLimit.prototype.handleResponse = function (response) {
 }
 
 AxiosRateLimit.prototype.unshift = function (requestHandler) {
-  this.queue.push(requestHandler)
+  this.queue.unshift(requestHandler)
   this.shiftInitial()
 }
 

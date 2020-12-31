@@ -32,9 +32,3 @@ http.setMaxRPS(3)
 http.getMaxRPS() // 3
 http.setRateLimitOptions({ maxRequests: 6, perMilliseconds: 150 }) // same options as constructor
 ```
-
-## Credits
-
-Sponsored by [JetRockets](http://www.jetrockets.pro).
-
-<img src="https://media.jetrockets.pro/jetrockets-white.svg" width="250" alt="JetRockets">

@@ -1,3 +1,9 @@
+# Fork
+this is a fork of https://github.com/aishek/axios-rate-limit which has following changes in it:
+* rewrite in Typescript
+* allows passing in an redis instance, to use it as queue storage. this allows global rate limits accros
+ different processes.
+
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 

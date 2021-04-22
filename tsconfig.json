@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    // target settings for node
+    "module": "commonjs",
+    "target": "es2019",
+
+    "lib": ["es2019", "dom"],
+
+    // other best practice configs
+    "moduleResolution": "node",
+    "strict": true,
+    "emitDecoratorMetadata": true,
+    "composite": true,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "isolatedModules": false,
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+  },
+  "include": ["./src"]
+}

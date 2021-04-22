@@ -155,34 +155,6 @@ export class AxiosRateLimit {
 			queued.resolve();
 		});
 	}
-
-	private shiftOLD() {
-		if (!this.queue.length) return;
-		if (this.timeslotRequests === this.maxRequests) {
-			if (this.timeoutId && typeof this.timeoutId.ref === 'function') {
-				this.timeoutId.ref();
-			}
-
-			return;
-		}
-
-		const queued = this.queue.shift();
-		// queued redis
-		queued?.resolve();
-
-		if (this.timeslotRequests === 0) {
-			this.timeoutId = setTimeout(() => {
-				this.timeslotRequests = 0;
-				this.shift();
-			}, this.perMilliseconds);
-
-			if (typeof this.timeoutId.unref === 'function') {
-				if (this.queue.length === 0) this.timeoutId.unref();
-			}
-		}
-
-		this.timeslotRequests += 1;
-	}
 }
 
 /**

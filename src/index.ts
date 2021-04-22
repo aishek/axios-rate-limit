@@ -1,6 +1,10 @@
-import type { AxiosInstance } from 'axios';
+import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { MemoryStore } from './MemoryStore';
 
-type RateLimitOptions = { maxRequests?: number; perMilliseconds?: number } | { maxRPS?: number };
+type RateLimitOptions = {
+	keyGenerator?: (request: AxiosRequestConfig) => string;
+	maxDelayMs?: number;
+} & ({ maxRequests?: number; perMilliseconds?: number } | { maxRPS?: number });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function configWithMaxRPS(options: any): options is { maxRPS: number } {
@@ -15,7 +19,7 @@ function configWithMillisecondsAndMaxRequests(
 }
 
 export class AxiosRateLimit {
-	private queue: { resolve(): void }[] = [];
+	private queue: { request: any; resolve(): void; reject(err: Error): void }[] = [];
 
 	private timeslotRequests = 0;
 
@@ -25,8 +29,29 @@ export class AxiosRateLimit {
 
 	timeoutId?: NodeJS.Timeout;
 
-	constructor(axios: AxiosInstance) {
-		this.enable(axios);
+	private store: MemoryStore;
+
+	private instanceId = Math.random();
+
+	private keyGenerator: (request: AxiosRequestConfig) => string;
+
+	maxDelayMs: number;
+
+	constructor(axios: AxiosInstance, options?: RateLimitOptions, store?: MemoryStore) {
+		if (options) {
+			this.setRateLimitOptions(options, store);
+		}
+
+		this.keyGenerator =
+			options?.keyGenerator ||
+			((_request: AxiosRequestConfig) => `axios-rate-limit-${this.instanceId}`);
+
+		function handleError(error: Error) {
+			return Promise.reject(error);
+		}
+
+		axios.interceptors.request.use(this.handleRequest.bind(this), handleError);
+		axios.interceptors.response.use(this.handleResponse.bind(this), handleError);
 	}
 
 	getMaxRPS(): number {
@@ -41,32 +66,32 @@ export class AxiosRateLimit {
 		});
 	}
 
-	setRateLimitOptions(options: RateLimitOptions): void {
+	setRateLimitOptions(options: RateLimitOptions, store?: MemoryStore): void {
 		if (configWithMaxRPS(options)) {
 			this.setMaxRPS(options.maxRPS);
-		} else if (configWithMillisecondsAndMaxRequests(options)) {
+			return;
+		}
+
+		this.maxDelayMs = options.maxDelayMs || Infinity;
+
+		if (configWithMillisecondsAndMaxRequests(options)) {
 			this.perMilliseconds = options.perMilliseconds;
 			this.maxRequests = options.maxRequests;
 		} else {
 			throw new Error('invalid config parameters');
 		}
-	}
 
-	private enable(axios: AxiosInstance) {
-		function handleError(error: Error) {
-			return Promise.reject(error);
-		}
-
-		axios.interceptors.request.use(this.handleRequest.bind(this), handleError);
-		axios.interceptors.response.use(this.handleResponse.bind(this), handleError);
+		this.store = store || new MemoryStore(this.perMilliseconds || 1000);
 	}
 
 	private handleRequest<V>(request: V) {
-		return new Promise<V>(resolve => {
+		return new Promise<V>((resolve, reject) => {
 			this.push({
+				request,
 				resolve() {
 					resolve(request);
-				}
+				},
+				reject
 			});
 		});
 	}
@@ -76,7 +101,7 @@ export class AxiosRateLimit {
 		return response;
 	}
 
-	private push(requestHandler: { resolve(): void }) {
+	private push(requestHandler: { request: any; resolve(): void; reject(err: Error): void }) {
 		this.queue.push(requestHandler);
 		this.shiftInitial();
 	}
@@ -87,6 +112,52 @@ export class AxiosRateLimit {
 
 	private shift() {
 		if (!this.queue.length) return;
+
+		const queued = this.queue.shift();
+
+		if (!queued) {
+			return;
+		}
+
+		const key = this.keyGenerator(queued.request);
+
+		console.log('key', key);
+
+		this.store.incr(key, (err, current, resetTime) => {
+			if (err) {
+				return queued.reject(err);
+			}
+
+			let delay = 0;
+
+			if (current > this.maxRequests) {
+				const unboundedDelay = (current - this.maxRequests) * this.perMilliseconds;
+				delay = Math.min(unboundedDelay, this.maxDelayMs);
+			}
+
+			console.log('slowDown', {
+				limit: this.maxRequests,
+				current,
+				remaining: Math.max(this.maxRequests - current, 0),
+				resetTime,
+				delay
+			});
+
+			if (current - 1 === this.maxRequests) {
+				console.info('limit reached');
+				// options.onLimitReached(req, res, options);
+			}
+
+			if (delay !== 0) {
+				return setTimeout(queued.resolve, delay);
+			}
+
+			queued.resolve();
+		});
+	}
+
+	private shiftOLD() {
+		if (!this.queue.length) return;
 		if (this.timeslotRequests === this.maxRequests) {
 			if (this.timeoutId && typeof this.timeoutId.ref === 'function') {
 				this.timeoutId.ref();
@@ -96,6 +167,7 @@ export class AxiosRateLimit {
 		}
 
 		const queued = this.queue.shift();
+		// queued redis
 		queued?.resolve();
 
 		if (this.timeslotRequests === 0) {
@@ -138,12 +210,8 @@ export class AxiosRateLimit {
  * @param {Number} options.perMilliseconds amount of time to limit concurrent requests.
  * @returns {Object} axios instance with interceptors added
  */
-function axiosRateLimit(axios: AxiosInstance, options?: RateLimitOptions) {
-	const rateLimitInstance = new AxiosRateLimit(axios);
-	if (options) {
-		rateLimitInstance.setRateLimitOptions(options);
-	}
-
+function axiosRateLimit(axios: AxiosInstance, options?: RateLimitOptions, store?: MemoryStore) {
+	const rateLimitInstance = new AxiosRateLimit(axios, options, store);
 	// eslint-disable-next-line no-param-reassign
 	axios.getMaxRPS = AxiosRateLimit.prototype.getMaxRPS.bind(rateLimitInstance);
 	// eslint-disable-next-line no-param-reassign

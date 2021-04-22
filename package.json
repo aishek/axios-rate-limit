@@ -1,16 +1,16 @@
 {
   "name": "@hokify/axios-rate-limit",
   "description": "Rate limit for axios.",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/aishek/axios-rate-limit/issues"
+    "url": "https://github.com/hokify/axios-rate-limit/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aishek/axios-rate-limit.git"
+    "url": "https://github.com/hokify/axios-rate-limit.git"
   },
-  "homepage": "https://github.com/aishek/axios-rate-limit#readme",
+  "homepage": "https://github.com/hokify/axios-rate-limit#readme",
   "devDependencies": {
     "@hokify/eslint-config": "^1.1.5",
     "axios": "^0.18.0",
@@ -63,6 +63,7 @@
     "limit"
   ],
   "author": "Alexandr Borisov (aishek@gmail.com)",
+  "contributors": ["Simon Tretter (simon.tretter@hokify.com)"],
   "yaspeller": {
     "lang": "en",
     "dictionary": [

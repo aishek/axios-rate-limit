@@ -21,13 +21,9 @@ function configWithMillisecondsAndMaxRequests(
 export class AxiosRateLimit {
 	private queue: { request: any; resolve(): void; reject(err: Error): void }[] = [];
 
-	private timeslotRequests = 0;
+	private perMilliseconds: number;
 
-	perMilliseconds: number;
-
-	maxRequests: number;
-
-	timeoutId?: NodeJS.Timeout;
+	private maxRequests: number;
 
 	private store: MemoryStore;
 
@@ -89,6 +85,7 @@ export class AxiosRateLimit {
 			this.push({
 				request,
 				resolve() {
+					(request as any)._startTime = new Date();
 					resolve(request);
 				},
 				reject
@@ -97,7 +94,24 @@ export class AxiosRateLimit {
 	}
 
 	private handleResponse<V>(response: V) {
-		this.shift();
+		// if it took more than perMilliseconds / maxRequests time, then decrement immediately, otherwiese wait
+		// till minimum time has passed.
+		const key = this.keyGenerator((response as any).config);
+
+		const tookTime = new Date().getTime() - (response as any).config._startTime.getTime();
+		const rest = this.perMilliseconds / this.maxRequests - tookTime;
+
+		const completed = () => {
+			this.store.decrement(key);
+			this.shift();
+		};
+
+		if (rest > 0) {
+			setTimeout(completed, rest);
+		} else {
+			completed();
+		}
+
 		return response;
 	}
 
@@ -121,11 +135,10 @@ export class AxiosRateLimit {
 
 		const key = this.keyGenerator(queued.request);
 
-		console.log('key', key);
-
-		this.store.incr(key, (err, current, resetTime) => {
+		this.store.incr(key, (err: Error | undefined, current: number) => {
 			if (err) {
-				return queued.reject(err);
+				queued.reject(err);
+				return;
 			}
 
 			let delay = 0;
@@ -135,21 +148,16 @@ export class AxiosRateLimit {
 				delay = Math.min(unboundedDelay, this.maxDelayMs);
 			}
 
-			console.log('slowDown', {
-				limit: this.maxRequests,
-				current,
-				remaining: Math.max(this.maxRequests - current, 0),
-				resetTime,
-				delay
-			});
-
 			if (current - 1 === this.maxRequests) {
-				console.info('limit reached');
-				// options.onLimitReached(req, res, options);
+				if (process.env.DEBUG_AXIOS_RATE_LIMITER) {
+					console.info('limit reached');
+					// options.onLimitReached(req, res, options);
+				}
 			}
 
 			if (delay !== 0) {
-				return setTimeout(queued.resolve, delay);
+				setTimeout(queued.resolve, delay);
+				return;
 			}
 
 			queued.resolve();
@@ -194,7 +202,7 @@ function axiosRateLimit(axios: AxiosInstance, options?: RateLimitOptions, store?
 	return axios;
 }
 
-module.exports = axiosRateLimit;
+export default axiosRateLimit;
 
 declare module 'axios' {
 	// eslint-disable-next-line @typescript-eslint/naming-convention

@@ -1,7 +1,7 @@
 {
   "name": "@hokify/axios-rate-limit",
   "description": "Rate limit for axios.",
-  "version": "2.0.0",
+  "version": "2.0.3",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/aishek/axios-rate-limit/issues"
@@ -29,6 +29,7 @@
     "dist"
   ],
   "scripts": {
+    "prepublishOnly": "npm run build",
     "build": "tsc",
     "watch": "yarn jest --watch",
     "test": "jest --forceExit --runInBand --coverage --detectOpenHandles && yarn lint && yarn spell",

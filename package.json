@@ -1,49 +1,39 @@
 {
-  "name": "axios-rate-limit",
+  "name": "@hokify/axios-rate-limit",
   "description": "Rate limit for axios.",
-  "version": "1.3.0",
+  "version": "2.0.4",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/aishek/axios-rate-limit/issues"
+    "url": "https://github.com/hokify/axios-rate-limit/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aishek/axios-rate-limit.git"
+    "url": "https://github.com/hokify/axios-rate-limit.git"
   },
-  "homepage": "https://github.com/aishek/axios-rate-limit#readme",
+  "homepage": "https://github.com/hokify/axios-rate-limit#readme",
   "devDependencies": {
-    "@logux/eslint-config": "^28.1.0",
+    "@hokify/eslint-config": "^1.1.5",
     "axios": "^0.18.0",
-    "eslint": "^5.16.0",
-    "eslint-ci": "^1.0.0",
-    "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-es5": "^1.3.1",
-    "eslint-plugin-import": "^2.17.2",
-    "eslint-plugin-import-helpers": "^0.1.4",
-    "eslint-plugin-jest": "^22.4.1",
-    "eslint-plugin-node": "^8.0.1",
-    "eslint-plugin-promise": "^4.1.1",
-    "eslint-plugin-security": "^1.4.0",
-    "eslint-plugin-standard": "^4.0.0",
-    "husky": "^1.3.1",
-    "jest": "^24.7.1",
-    "lint-staged": "^8.1.5",
-    "sinon": "^7.3.2",
-    "yaspeller-ci": "^1.0.0"
+    "husky": "^6.0.0",
+    "jest": "^26.6.3",
+    "lint-staged": "^10.5.4",
+    "sinon": "^10.0.0",
+    "yaspeller-ci": "^1.0.2"
   },
   "peerDependencies": {
     "axios": "*"
   },
-  "main": "src/index.js",
-  "typings": "typings/index.d.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "files": [
-    "src/index.js",
-    "typings/index.d.ts"
+    "dist"
   ],
   "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "tsc",
     "watch": "yarn jest --watch",
     "test": "jest --forceExit --runInBand --coverage --detectOpenHandles && yarn lint && yarn spell",
-    "lint": "eslint-ci src/*.js __tests__/*.js",
+    "lint": "eslint --fix src/* __tests__/*.js",
     "spell": "yaspeller-ci *.md"
   },
   "jest": {
@@ -57,23 +47,6 @@
     "coveragePathIgnorePatterns": [
       "/node_modules/"
     ]
-  },
-  "eslintConfig": {
-    "plugins": [
-      "jest"
-    ],
-    "extends": "@logux/eslint-config/browser",
-    "env": {
-      "jest/globals": true
-    },
-    "rules": {
-      "max-len": [
-        "error",
-        {
-          "ignoreComments": true
-        }
-      ]
-    }
   },
   "husky": {
     "hooks": {
@@ -90,6 +63,7 @@
     "limit"
   ],
   "author": "Alexandr Borisov (aishek@gmail.com)",
+  "contributors": ["Simon Tretter (simon.tretter@hokify.com)"],
   "yaspeller": {
     "lang": "en",
     "dictionary": [

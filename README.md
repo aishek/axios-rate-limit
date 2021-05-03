@@ -1,3 +1,17 @@
+# Fork
+this is a fork of https://github.com/aishek/axios-rate-limit which has following changes in it:
+* rewrite in Typescript
+* allows passing in a custom store, to share the state between instances/servers.
+  
+Note: this module does not share state with other processes/servers by default. Use a redis or Memcached Store for shared states.
+
+### Stores
+this fork uses the stores avaialble from express rate limiting. Therefore easy extendable :)
+
+- Memory Store _(default, built-in)_ - stores hits in-memory in the Node.js process. Does not share state with other servers or processes.
+- [Redis Store](https://npmjs.com/package/rate-limit-redis)
+- [Memcached Store](https://npmjs.org/package/rate-limit-memcached)
+
 # axios-rate-limit
 
 [![npm version](https://img.shields.io/npm/v/axios-rate-limit.svg?style=flat-square)](https://www.npmjs.com/package/axios-rate-limit)

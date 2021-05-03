@@ -42,12 +42,16 @@ export class AxiosRateLimit {
 			options?.keyGenerator ||
 			((_request: AxiosRequestConfig) => `axios-rate-limit-${this.instanceId}`);
 
-		function handleError(error: Error) {
-			return Promise.reject(error);
-		}
+		axios.interceptors.request.use(this.handleRequest.bind(this), this.handleError.bind(this));
+		axios.interceptors.response.use(this.handleResponse.bind(this), this.handleError.bind(this));
+	}
 
-		axios.interceptors.request.use(this.handleRequest.bind(this), handleError);
-		axios.interceptors.response.use(this.handleResponse.bind(this), handleError);
+	handleError(error: any) {
+		const key = this.keyGenerator(error.config);
+
+		this.store.decrement(key);
+
+		return Promise.reject(error);
 	}
 
 	getMaxRPS(): number {

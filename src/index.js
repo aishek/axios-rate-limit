@@ -49,9 +49,34 @@ AxiosRateLimit.prototype.enable = function (axios) {
   )
 }
 
+/*
+ * from axios library (dispatchRequest.js:11)
+ * @param config
+ */
+function throwIfCancellationRequested (config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested()
+  }
+}
+
 AxiosRateLimit.prototype.handleRequest = function (request) {
-  return new Promise(function (resolve) {
-    this.push({ resolve: function () { resolve(request) } })
+  return new Promise(function (resolve, reject) {
+    this.push({
+      /*
+       * rejects a cancelled request and returns request has been resolved or not
+       * @returns {boolean}
+       */
+      resolve: function () {
+        try {
+          throwIfCancellationRequested(request)
+        } catch (error) {
+          reject(error)
+          return false
+        }
+        resolve(request)
+        return true
+      }
+    })
   }.bind(this))
 }
 
@@ -80,7 +105,7 @@ AxiosRateLimit.prototype.shift = function () {
   }
 
   var queued = this.queue.shift()
-  queued.resolve()
+  var resolved = queued.resolve()
 
   if (this.timeslotRequests === 0) {
     this.timeoutId = setTimeout(function () {
@@ -91,6 +116,11 @@ AxiosRateLimit.prototype.shift = function () {
     if (typeof this.timeoutId.unref === 'function') {
       if (this.queue.length === 0) this.timeoutId.unref()
     }
+  }
+
+  if (!resolved) {
+    this.shift() // rejected request --> shift another request
+    return
   }
 
   this.timeslotRequests += 1

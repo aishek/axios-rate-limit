@@ -12,7 +12,7 @@
   },
   "homepage": "https://github.com/aishek/axios-rate-limit#readme",
   "devDependencies": {
-    "@logux/eslint-config": "^28.1.0",
+    "@logux/eslint-config": "28.1.0",
     "axios": "^0.18.0",
     "eslint": "^5.16.0",
     "eslint-ci": "^1.0.0",
@@ -28,8 +28,7 @@
     "husky": "^1.3.1",
     "jest": "^24.7.1",
     "lint-staged": "^8.1.5",
-    "sinon": "^7.3.2",
-    "yaspeller-ci": "^1.0.0"
+    "sinon": "^7.3.2"
   },
   "peerDependencies": {
     "axios": "*"
@@ -42,9 +41,8 @@
   ],
   "scripts": {
     "watch": "yarn jest --watch",
-    "test": "jest --forceExit --runInBand --coverage --detectOpenHandles && yarn lint && yarn spell",
-    "lint": "eslint-ci src/*.js __tests__/*.js",
-    "spell": "yaspeller-ci *.md"
+    "test": "jest --forceExit --runInBand --coverage --detectOpenHandles",
+    "lint": "eslint-ci src/*.js __tests__/*.js"
   },
   "jest": {
     "verbose": true,

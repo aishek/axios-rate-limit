@@ -35,3 +35,7 @@ http.setMaxRPS(3)
 http.getMaxRPS() // 3
 http.setRateLimitOptions({ maxRequests: 6, perMilliseconds: 150 }) // same options as constructor
 ```
+
+## Alternatives
+
+Consider using Axios built-in [rate-limiting](https://www.npmjs.com/package/axios#user-content--rate-limiting) functionality.

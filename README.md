@@ -7,7 +7,7 @@
 )](https://github.com/aishek/axios-rate-limit/actions?query=branch%3Amaster++)
 [![install size](https://img.shields.io/badge/dynamic/json?url=https://packagephobia.com/v2/api.json?p=axios-rate-limit&query=$.install.pretty&label=install%20size&style=flat-square)](https://packagephobia.now.sh/result?p=axios-rate-limit)
 
-A rate limit for axios: set how many requests per interval should perform immediately, other will be delayed automatically.
+A rate limit for [Axios](https://www.npmjs.com/package/axios): set how many requests per interval should perform immediately, other will be delayed automatically.
 
 ## Installing
 

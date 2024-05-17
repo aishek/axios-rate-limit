@@ -79,7 +79,6 @@
     }
   },
   "lint-staged": {
-    "*.md": "yaspeller-ci",
     "*.js": "eslint"
   },
   "keywords": [
@@ -87,27 +86,5 @@
     "rate",
     "limit"
   ],
-  "author": "Alexandr Borisov (aishek@gmail.com)",
-  "yaspeller": {
-    "lang": "en",
-    "dictionary": [
-      "Cifronomika",
-      "axios",
-      "Versioning",
-      "jsdoc",
-      "github",
-      "aishek",
-      "mcuppi",
-      "com",
-      "NodeJS",
-      "TypeScript",
-      "Unreleased",
-      "unref",
-      "maxRPS",
-      "setMaxRPS",
-      "getMaxRPS",
-      "setRateLimitOptions",
-      "lodash"
-    ]
-  }
+  "author": "Alexandr Borisov (aishek@gmail.com)"
 }

@@ -6,6 +6,7 @@
 [![build status](https://img.shields.io/github/actions/workflow/status/aishek/axios-rate-limit/node.js.yml
 )](https://github.com/aishek/axios-rate-limit/actions?query=branch%3Amaster++)
 [![install size](https://img.shields.io/badge/dynamic/json?url=https://packagephobia.com/v2/api.json?p=axios-rate-limit&query=$.install.pretty&label=install%20size&style=flat-square)](https://packagephobia.now.sh/result?p=axios-rate-limit)
+[![known vulnerabilities](https://snyk.io/test/npm/axios-rate-limit/badge.svg)](https://snyk.io/test/npm/axios-rate-limit)
 
 A rate limit for [Axios](https://www.npmjs.com/package/axios): set how many requests per interval should perform immediately, other will be delayed automatically.
 

@@ -30,3 +30,6 @@ jobs:
     - run: npm run build --if-present
     - run: npm test
     - run: npm run lint
+
+    - name: Coveralls
+      uses: coverallsapp/github-action@v2

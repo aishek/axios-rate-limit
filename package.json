@@ -41,7 +41,7 @@
   ],
   "scripts": {
     "watch": "yarn jest --watch",
-    "test": "jest --forceExit --runInBand --coverage --detectOpenHandles",
+    "test": "jest --forceExit --runInBand --coverage --detectOpenHandles && coveralls < ./coverage/lcov.info",
     "lint": "eslint-ci src/*.js __tests__/*.js"
   },
   "jest": {

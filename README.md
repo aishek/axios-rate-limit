@@ -14,7 +14,7 @@ A rate limit for [Axios](https://www.npmjs.com/package/axios): set how many requ
 ## Installing
 
 ```bash
-yarn add axios-rate-limit
+npm install axios-rate-limit
 ```
 
 ## Usage

@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+* Fixed cancelled requests behaviour, now they does not affect rate limiting (see https://github.com/aishek/axios-rate-limit/pull/50)
+
 ## 1.3.0
 * Add TypeScript typings (see https://github.com/aishek/axios-rate-limit/pull/23)
 * Upgrade handlebars to 4.5.3

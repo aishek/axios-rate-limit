@@ -37,7 +37,7 @@ export type rateLimitOptions = {
   *   http.getMaxRPS() // 3
   *   http.setRateLimitOptions({ maxRequests: 6, perMilliseconds: 150 }) // same options as constructor
   *
-  * @param {Object} axios axios instance
+  * @param {Object} axiosInstance axios instance
   * @param {Object} options options for rate limit, available for live update
   * @param {Number} options.maxRequests max requests to perform concurrently in given amount of time.
   * @param {Number} options.perMilliseconds amount of time to limit concurrent requests.

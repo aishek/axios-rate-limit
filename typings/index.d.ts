@@ -2,7 +2,7 @@ import { AxiosInstance } from 'axios';
 
 export interface RateLimitedAxiosInstance extends AxiosInstance {
    getMaxRPS: () => number,
-   setMaxRPS: (rps:number) => void,
+   setMaxRPS: (rps: number) => void,
    setRateLimitOptions: (options: rateLimitOptions) => void,
    // enable(axios: any): void,
    // handleRequest(request:any):any,
@@ -12,9 +12,9 @@ export interface RateLimitedAxiosInstance extends AxiosInstance {
    // shift():any
 }
 
-export type rateLimitOptions = { 
-    maxRequests?: number, 
-    perMilliseconds?: number, 
+export type rateLimitOptions = {
+    maxRequests?: number,
+    perMilliseconds?: number,
     maxRPS?: number
 };
 

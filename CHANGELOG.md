@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.2
+* Fixed TypeScript typings (see https://github.com/aishek/axios-rate-limit/pull/34)
+
 ## 1.3.1
 * Fixed cancelled requests behaviour, now they does not affect rate limiting (see https://github.com/aishek/axios-rate-limit/pull/50)
 

@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.3
+* Fix axios dependency specification
+
 ## 1.3.2
 * Fixed TypeScript typings (see https://github.com/aishek/axios-rate-limit/pull/34)
 

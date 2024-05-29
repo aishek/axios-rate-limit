@@ -1,4 +1,14 @@
-var axios = require('axios')
+function requireAxios (version) {
+  switch (version) {
+    case '1':
+      return require('axios1/dist/browser/axios.cjs') // eslint-disable-line global-require
+    case '0':
+    default:
+      return require('axios0') // eslint-disable-line global-require
+  }
+}
+
+var axios = requireAxios(process.env.AXIOS_VERSION)
 var sinon = require('sinon')
 
 var axiosRateLimit = require('../src/index')
@@ -138,7 +148,7 @@ it('reject request if it was cancelled before executing', async function () {
 
   expect(onSuccess.callCount).toBe(0)
   expect(onFailure.callCount).toBe(1)
-  expect(onFailure.args).toEqual([[{ 'message': 'cancelled for testing' }]])
+  expect(onFailure.args.toString()).toContain('cancelled for testing')
 })
 
 it('not delay requests if requests are cancelled', async function () {

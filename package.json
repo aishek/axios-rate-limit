@@ -15,6 +15,8 @@
     "axios": ">=0.18.0"
   },
   "devDependencies": {
+    "axios0": "npm:axios@^0.28.1",
+    "axios1": "npm:axios@^1.0.0",
     "@logux/eslint-config": "28.1.0",
     "eslint": "^5.16.0",
     "eslint-ci": "^1.0.0",

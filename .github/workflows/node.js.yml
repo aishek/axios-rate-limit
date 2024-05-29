@@ -18,10 +18,12 @@ jobs:
       matrix:
         node-version: [8.x, 14.x, 16.x, 18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
+        axios-version: [0, 1]
+    env:
+      HAPI_VERSION: ${{ matrix.axios-version }}
     steps:
     - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js ${{ matrix.node-version }} axios@${{ matrix.axios-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}

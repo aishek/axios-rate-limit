@@ -1,7 +1,7 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 1.4.0
 * Expose requests queue via getQueue (see https://github.com/aishek/axios-rate-limit/pull/62)
 
 ## 1.3.3

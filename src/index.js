@@ -159,8 +159,8 @@ function axiosRateLimit (axios, options) {
   var rateLimitInstance = new AxiosRateLimit(axios)
   rateLimitInstance.setRateLimitOptions(options)
 
-  axios.getMaxRPS = AxiosRateLimit.prototype.getMaxRPS.bind(rateLimitInstance)
   axios.getQueue = AxiosRateLimit.prototype.getQueue.bind(rateLimitInstance)
+  axios.getMaxRPS = AxiosRateLimit.prototype.getMaxRPS.bind(rateLimitInstance)
   axios.setMaxRPS = AxiosRateLimit.prototype.setMaxRPS.bind(rateLimitInstance)
   axios.setRateLimitOptions = AxiosRateLimit.prototype.setRateLimitOptions
     .bind(rateLimitInstance)

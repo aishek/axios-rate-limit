@@ -1,15 +1,20 @@
 import { AxiosInstance } from 'axios';
 
+export type RateLimitRequestHandler = {
+  resolve: () => boolean
+}
+
 export interface RateLimitedAxiosInstance extends AxiosInstance {
-   getMaxRPS: () => number,
-   setMaxRPS: (rps: number) => void,
-   setRateLimitOptions: (options: rateLimitOptions) => void,
-   // enable(axios: any): void,
-   // handleRequest(request:any):any,
-   // handleResponse(response: any): any,
-   // push(requestHandler:any):any,
-   // shiftInitial():any,
-   // shift():any
+    getQueue: () => RateLimitRequestHandler[],
+    getMaxRPS: () => number,
+    setMaxRPS: (rps: number) => void,
+    setRateLimitOptions: (options: rateLimitOptions) => void,
+    // enable(axios: any): void,
+    // handleRequest(request:any):any,
+    // handleResponse(response: any): any,
+    // push(requestHandler:any):any,
+    // shiftInitial():any,
+    // shift():any
 }
 
 export type rateLimitOptions = {

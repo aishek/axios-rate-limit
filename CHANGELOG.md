@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+* Expose requests queue via getQueue (see https://github.com/aishek/axios-rate-limit/pull/62)
+
 ## 1.3.3
 * Fix axios dependency specification
 

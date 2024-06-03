@@ -11,4 +11,4 @@ issuehunt: # Replace with a single IssueHunt username
 lfx_crowdfunding: # Replace with a single LFX Crowdfunding project-name e.g., cloud-foundry
 polar: # Replace with a single Polar username
 buy_me_a_coffee: # Replace with a single Buy Me a Coffee username
-custom: ['https://link.trustwallet.com/send?address=0x0f6E6CDBB3E1631722A28B012eDa9Ea6229CF013&asset=c60_t0xc3761EB917CD790B30dAD99f6Cc5b4Ff93C4F9eA']
+custom: ['https://link.trustwallet.com/send?address=0x0f6E6CDBB3E1631722A28B012eDa9Ea6229CF013&asset=c60_t0xc3761EB917CD790B30dAD99f6Cc5b4Ff93C4F9eA', 'https://link.trustwallet.com/send?asset=c195_tTR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t&address=TWcdNRFeo8MrP992q1SxfbBYPKf6dCT7d6']

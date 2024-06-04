@@ -30,6 +30,7 @@ const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000, 
 http.getMaxRPS() // 2
 http.get('https://example.com/api/v1/users.json?page=1') // will perform immediately
 http.get('https://example.com/api/v1/users.json?page=2') // will perform immediately
+http.getQueue() // [{...}]
 http.get('https://example.com/api/v1/users.json?page=3') // will perform after 1 second from the first one
 
 // options hot-reloading also available

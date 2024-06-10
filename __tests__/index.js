@@ -81,10 +81,12 @@ it('support dynamic options', async function () {
   }
   await delay(90)
   expect(onSuccess.callCount).toEqual(2)
+  expect(http.getQueue().length).toEqual(1)
 
   await Promise.all(requests)
   var end = Date.now()
   expect(onSuccess.callCount).toEqual(3)
+  expect(http.getQueue().length).toEqual(0)
   expect(end - start).toBeGreaterThan(100)
   await delay(110)
 

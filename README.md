@@ -39,6 +39,27 @@ http.getMaxRPS() // 3
 http.setRateLimitOptions({ maxRequests: 6, perMilliseconds: 150 }) // same options as constructor
 ```
 
+You can also share a rate limiter between axios instances
+
+```javascript
+import axios from 'axios';
+import rateLimit, { getLimiter } from 'axios-rate-limit';
+
+const rateLimiter = getLimiter({ maxRPS: 2 })
+
+const http1 = rateLimiter.enabled(axios.create({baseUrl: 'http://example.com/api/v1/users/1'}))
+// another way of doing the same thing:
+const http2 = rateLimit(
+    axios.create({baseUrl: 'http://example.com/api/v1/users/2'}),
+    { rateLimiter: rateLimiter }
+)
+
+http1.get('/info.json') // will perform immediately
+http2.get('/info.json') // will perform immediately
+http1.get('/info.json') // will after one second from the first one
+
+```
+
 ## Alternatives
 
 Consider using Axios built-in [rate-limiting](https://www.npmjs.com/package/axios#user-content--rate-limiting) functionality.

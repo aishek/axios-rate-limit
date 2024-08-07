@@ -1,16 +1,11 @@
-function AxiosRateLimit (axios) {
+function AxiosRateLimit (options) {
   this.queue = []
   this.timeslotRequests = 0
-
-  this.interceptors = {
-    request: null,
-    response: null
-  }
 
   this.handleRequest = this.handleRequest.bind(this)
   this.handleResponse = this.handleResponse.bind(this)
 
-  this.enable(axios)
+  this.setRateLimitOptions(options)
 }
 
 AxiosRateLimit.prototype.getMaxRPS = function () {
@@ -43,14 +38,21 @@ AxiosRateLimit.prototype.enable = function (axios) {
     return Promise.reject(error)
   }
 
-  this.interceptors.request = axios.interceptors.request.use(
+  axios.interceptors.request.use(
     this.handleRequest,
     handleError
   )
-  this.interceptors.response = axios.interceptors.response.use(
+  axios.interceptors.response.use(
     this.handleResponse,
     handleError
   )
+
+  axios.getQueue = this.getQueue.bind(this)
+  axios.getMaxRPS = this.getMaxRPS.bind(this)
+  axios.setMaxRPS = this.setMaxRPS.bind(this)
+  axios.setRateLimitOptions = this.setRateLimitOptions.bind(this)
+
+  return axios
 }
 
 /*
@@ -156,16 +158,33 @@ AxiosRateLimit.prototype.shift = function () {
  * @returns {Object} axios instance with interceptors added
  */
 function axiosRateLimit (axios, options) {
-  var rateLimitInstance = new AxiosRateLimit(axios)
-  rateLimitInstance.setRateLimitOptions(options)
+  var rateLimitInstance = options.rateLimiter || new AxiosRateLimit(options)
 
-  axios.getQueue = AxiosRateLimit.prototype.getQueue.bind(rateLimitInstance)
-  axios.getMaxRPS = AxiosRateLimit.prototype.getMaxRPS.bind(rateLimitInstance)
-  axios.setMaxRPS = AxiosRateLimit.prototype.setMaxRPS.bind(rateLimitInstance)
-  axios.setRateLimitOptions = AxiosRateLimit.prototype.setRateLimitOptions
-    .bind(rateLimitInstance)
+  rateLimitInstance.enable(axios)
 
   return axios
 }
 
+/**
+ * Create a new rate limiter instance. It can be shared between multiple axios instances.
+ * The rate-limiting is shared between axios instances that are enabled with this rate limiter.
+ *
+ * @example
+ *   import rateLimit, { getLimiter } from 'axios-rate-limit';
+ *
+ *   const limiter = getLimiter({ maxRequests: 2, perMilliseconds: 1000 })
+ *   // limit an axios instance with this rate limiter:
+ *   const http1 = limiter.enable(axios.create())
+ *   // another way of doing the same thing:
+ *   const http2 = rateLimit(axios.create(), { rateLimiter: limiter })
+ *
+ * @param {Object} options options for rate limit, same as for rateLimit()
+ * @returns {Object} rate limiter instance
+ */
+function getLimiter (options) {
+  return new AxiosRateLimit(options)
+}
+
 module.exports = axiosRateLimit
+module.exports.AxiosRateLimiter = AxiosRateLimit
+module.exports.getLimiter = getLimiter

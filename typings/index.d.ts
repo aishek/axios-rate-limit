@@ -4,12 +4,11 @@ export type RateLimitRequestHandler = {
   resolve: () => boolean
 }
 
-export interface RateLimitedAxiosInstance extends AxiosInstance {
+export interface RateLimiter {
     getQueue: () => RateLimitRequestHandler[],
     getMaxRPS: () => number,
     setMaxRPS: (rps: number) => void,
     setRateLimitOptions: (options: rateLimitOptions) => void,
-    // enable(axios: any): void,
     // handleRequest(request:any):any,
     // handleResponse(response: any): any,
     // push(requestHandler:any):any,
@@ -17,11 +16,38 @@ export interface RateLimitedAxiosInstance extends AxiosInstance {
     // shift():any
 }
 
+export interface RateLimitedAxiosInstance extends AxiosInstance, RateLimiter {}
+
 export type rateLimitOptions = {
     maxRequests?: number,
     perMilliseconds?: number,
     maxRPS?: number
 };
+
+export interface AxiosRateLimiter extends RateLimiter {}
+
+export class AxiosRateLimiter implements RateLimiter {
+  constructor(options: rateLimitOptions);
+  enable(axios: AxiosInstance): RateLimitedAxiosInstance;
+}
+
+/**
+ * Create a new rate limiter instance. It can be shared between multiple axios instances.
+ * The rate-limiting is shared between axios instances that are enabled with this rate limiter.
+ *
+ * @example
+ *   import rateLimit, { getLimiter } from 'axios-rate-limit';
+ *
+ *   const limiter = getLimiter({ maxRequests: 2, perMilliseconds: 1000 })
+ *   // limit an axios instance with this rate limiter:
+ *   const http1 = limiter.enable(axios.create())
+ *   // another way of doing the same thing:
+ *   const http2 = rateLimit(axios.create(), { rateLimiter: limiter })
+ *
+ * @param {Object} options options for rate limit, same as for rateLimit()
+ * @returns {Object} rate limiter instance
+ */
+export function getLimiter (options: rateLimitOptions): AxiosRateLimiter;
 
  /**
   * Apply rate limit to axios instance.
@@ -50,5 +76,5 @@ export type rateLimitOptions = {
   */
 export default function axiosRateLimit(
     axiosInstance: AxiosInstance,
-    options: rateLimitOptions
+    options: rateLimitOptions & { rateLimiter?: AxiosRateLimiter }
 ): RateLimitedAxiosInstance;

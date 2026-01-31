@@ -39,6 +39,11 @@ http.getMaxRPS() // 3
 http.setRateLimitOptions({ maxRequests: 6, perMilliseconds: 150 }) // same options as constructor
 ```
 
+## Tech Details
+
+The axios-rate-limit implements fixed-window, queued rate limiter. The main disadvantage of this
+approach is possibility of bursts at window boundaries in case of limit hit.
+
 ## Alternatives
 
 Consider using Axios built-in [rate-limiting](https://www.npmjs.com/package/axios#user-content--rate-limiting) functionality.

@@ -8,7 +8,7 @@ export interface RateLimitedAxiosInstance extends AxiosInstance {
     getQueue: () => RateLimitRequestHandler[],
     getMaxRPS: () => number,
     setMaxRPS: (rps: number) => void,
-    setRateLimitOptions: (options: rateLimitOptions) => void,
+    setRateLimitOptions: (options?: rateLimitOptions) => void,
     // enable(axios: any): void,
     // handleRequest(request:any):any,
     // handleResponse(response: any): any,
@@ -17,10 +17,17 @@ export interface RateLimitedAxiosInstance extends AxiosInstance {
     // shift():any
 }
 
+export type RateLimitEntry = {
+    maxRequests: number,
+    duration: string
+};
+
 export type rateLimitOptions = {
     maxRequests?: number,
     perMilliseconds?: number,
-    maxRPS?: number
+    maxRPS?: number,
+    duration?: string,
+    limits?: RateLimitEntry[]
 };
 
  /**
@@ -50,5 +57,5 @@ export type rateLimitOptions = {
   */
 export default function axiosRateLimit(
     axiosInstance: AxiosInstance,
-    options: rateLimitOptions
+    options?: rateLimitOptions
 ): RateLimitedAxiosInstance;

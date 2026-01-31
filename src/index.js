@@ -1,6 +1,73 @@
+var DURATION_MSG = " Expected format: number+unit ms, s, m, h (e.g. '1s')."
+
+var DURATION_UNITS = { ms: 1, s: 1000, m: 60000, h: 3600000 }
+
+function parseDuration (value) {
+  if (typeof value === 'number' && !isNaN(value)) {
+    return value
+  }
+  if (typeof value !== 'string') {
+    var msg = "Unrecognized duration: '" + String(value) + "'." + DURATION_MSG
+    throw new Error(msg)
+  }
+  var s = value.trim()
+  var num
+  var mult
+  if (s.length >= 2 && s.slice(-2) === 'ms') {
+    num = parseFloat(s.slice(0, -2), 10)
+    mult = 1
+  } else if (s.length >= 1) {
+    var u = s.slice(-1)
+    mult = DURATION_UNITS[u]
+    if (mult == null) {
+      var err = "Unrecognized duration: '" + value + "'." + DURATION_MSG
+      throw new Error(err)
+    }
+    num = parseFloat(s.slice(0, -1), 10)
+  } else {
+    var err2 = "Unrecognized duration: '" + value + "'." + DURATION_MSG
+    throw new Error(err2)
+  }
+  if (isNaN(num) || num < 0) {
+    var err3 = "Unrecognized duration: '" + value + "'." + DURATION_MSG
+    throw new Error(err3)
+  }
+  return num * mult
+}
+
+function buildWindows (options) {
+  var limits = options && options.limits
+  if (limits && limits.length > 0) {
+    return limits.map(function (limit) {
+      var perMs = parseDuration(limit.duration)
+      return { count: 0, max: limit.maxRequests, perMs: perMs, timeoutId: null }
+    })
+  }
+  var maxRequests = options.maxRequests
+  var perMs
+  if (options.maxRPS != null) {
+    maxRequests = options.maxRPS
+    perMs = 1000
+  } else {
+    var optD = options.duration
+    perMs = optD != null ? parseDuration(optD) : options.perMilliseconds
+  }
+  return [{ count: 0, max: maxRequests, perMs: perMs, timeoutId: null }]
+}
+
+function clearWindowsTimeouts (windows) {
+  if (!windows) return
+  for (var i = 0; i < windows.length; i++) {
+    if (windows[i].timeoutId != null) {
+      clearTimeout(windows[i].timeoutId)
+      windows[i].timeoutId = null
+    }
+  }
+}
+
 function AxiosRateLimit (axios) {
   this.queue = []
-  this.timeslotRequests = 0
+  this.windows = []
 
   this.interceptors = {
     request: null,
@@ -14,8 +81,9 @@ function AxiosRateLimit (axios) {
 }
 
 AxiosRateLimit.prototype.getMaxRPS = function () {
-  var perSeconds = (this.perMilliseconds / 1000)
-  return this.maxRequests / perSeconds
+  var w = this.windows[0]
+  if (!w) return 0
+  return w.max / (w.perMs / 1000)
 }
 
 AxiosRateLimit.prototype.getQueue = function () {
@@ -30,12 +98,9 @@ AxiosRateLimit.prototype.setMaxRPS = function (rps) {
 }
 
 AxiosRateLimit.prototype.setRateLimitOptions = function (options) {
-  if (options.maxRPS) {
-    this.setMaxRPS(options.maxRPS)
-  } else {
-    this.perMilliseconds = options.perMilliseconds
-    this.maxRequests = options.maxRequests
-  }
+  if (!options) return
+  clearWindowsTimeouts(this.windows)
+  this.windows = buildWindows(options)
 }
 
 AxiosRateLimit.prototype.enable = function (axios) {
@@ -100,34 +165,40 @@ AxiosRateLimit.prototype.shiftInitial = function () {
 
 AxiosRateLimit.prototype.shift = function () {
   if (!this.queue.length) return
-  if (this.timeslotRequests === this.maxRequests) {
-    if (this.timeoutId && typeof this.timeoutId.ref === 'function') {
-      this.timeoutId.ref()
+  var windows = this.windows
+  for (var i = 0; i < windows.length; i++) {
+    if (windows[i].count === windows[i].max) {
+      var tid = windows[i].timeoutId
+      if (tid && typeof tid.ref === 'function') {
+        tid.ref()
+      }
+      return
     }
-
-    return
   }
 
   var queued = this.queue.shift()
   var resolved = queued.resolve()
 
-  if (this.timeslotRequests === 0) {
-    this.timeoutId = setTimeout(function () {
-      this.timeslotRequests = 0
-      this.shift()
-    }.bind(this), this.perMilliseconds)
-
-    if (typeof this.timeoutId.unref === 'function') {
-      if (this.queue.length === 0) this.timeoutId.unref()
-    }
-  }
-
   if (!resolved) {
-    this.shift() // rejected request --> shift another request
+    this.shift()
     return
   }
 
-  this.timeslotRequests += 1
+  var self = this
+  for (var j = 0; j < windows.length; j++) {
+    var w = windows[j]
+    w.count += 1
+    if (w.count === 1) {
+      w.timeoutId = setTimeout(function (win) {
+        win.count = 0
+        win.timeoutId = null
+        self.shift()
+      }.bind(null, w), w.perMs)
+      if (typeof w.timeoutId.unref === 'function') {
+        if (this.queue.length === 0) w.timeoutId.unref()
+      }
+    }
+  }
 }
 
 /**
@@ -157,7 +228,9 @@ AxiosRateLimit.prototype.shift = function () {
  */
 function axiosRateLimit (axios, options) {
   var rateLimitInstance = new AxiosRateLimit(axios)
-  rateLimitInstance.setRateLimitOptions(options)
+  if (options != null) {
+    rateLimitInstance.setRateLimitOptions(options)
+  }
 
   axios.getQueue = AxiosRateLimit.prototype.getQueue.bind(rateLimitInstance)
   axios.getMaxRPS = AxiosRateLimit.prototype.getMaxRPS.bind(rateLimitInstance)

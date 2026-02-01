@@ -4,6 +4,10 @@ var DURATION_UNITS = { ms: 1, s: 1000, m: 60000, h: 3600000 }
 
 function parseDuration (value) {
   if (typeof value === 'number' && !isNaN(value)) {
+    if (value < 0) {
+      var msgNum = "Unrecognized duration: '" + value + "'." + DURATION_MSG
+      throw new Error(msgNum)
+    }
     return value
   }
   if (typeof value !== 'string') {

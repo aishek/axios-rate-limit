@@ -417,6 +417,29 @@ it('setRateLimitOptions processes queued reqs', async function () {
   expect(onSuccess.callCount).toEqual(2)
 })
 
+it('setRateLimitOptions invalid leaves windows intact', async function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    { maxRequests: 1, perMilliseconds: 200 }
+  )
+  var onSuccess = sinon.spy()
+  var p1 = http.get('/users').then(onSuccess)
+  var p2 = http.get('/users').then(onSuccess)
+  await delay(10)
+  expect(onSuccess.callCount).toEqual(1)
+  expect(http.getQueue().length).toEqual(1)
+  expect(function () {
+    http.setRateLimitOptions({
+      limits: [{ maxRequests: 1, duration: 'invalid' }]
+    })
+  }).toThrow(/Expected format.*ms.*s.*m.*h/)
+  await delay(250)
+  await Promise.all([p1, p2])
+  expect(onSuccess.callCount).toEqual(2)
+})
+
 it('blocked by full window with timeout triggers ref path', async function () {
   function adapter (config) { return Promise.resolve(config) }
 

@@ -19,13 +19,13 @@ function parseDuration (value) {
   var num
   var mult
   if (s.length >= 2 && s.slice(-2) === 'ms') {
-    num = parseFloat(s.slice(0, -2), 10)
+    num = parseFloat(s.slice(0, -2))
     mult = 1
   } else if (s.length >= 1) {
     var u = s.slice(-1)
     mult = DURATION_UNITS[u]
     if (mult == null) throwDurationError(value)
-    num = parseFloat(s.slice(0, -1), 10)
+    num = parseFloat(s.slice(0, -1))
   } else {
     throwDurationError(value)
   }

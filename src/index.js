@@ -2,17 +2,18 @@ var DURATION_MSG = " Expected format: number+unit ms, s, m, h (e.g. '1s')."
 
 var DURATION_UNITS = { ms: 1, s: 1000, m: 60000, h: 3600000 }
 
+function throwDurationError (value) {
+  var msg = "Unrecognized duration: '" + String(value) + "'." + DURATION_MSG
+  throw new Error(msg)
+}
+
 function parseDuration (value) {
   if (typeof value === 'number' && !isNaN(value)) {
-    if (value < 0) {
-      var msgNum = "Unrecognized duration: '" + value + "'." + DURATION_MSG
-      throw new Error(msgNum)
-    }
+    if (value < 0) throwDurationError(value)
     return value
   }
   if (typeof value !== 'string') {
-    var msg = "Unrecognized duration: '" + String(value) + "'." + DURATION_MSG
-    throw new Error(msg)
+    throwDurationError(value)
   }
   var s = value.trim()
   var num
@@ -23,18 +24,13 @@ function parseDuration (value) {
   } else if (s.length >= 1) {
     var u = s.slice(-1)
     mult = DURATION_UNITS[u]
-    if (mult == null) {
-      var err = "Unrecognized duration: '" + value + "'." + DURATION_MSG
-      throw new Error(err)
-    }
+    if (mult == null) throwDurationError(value)
     num = parseFloat(s.slice(0, -1), 10)
   } else {
-    var err2 = "Unrecognized duration: '" + value + "'." + DURATION_MSG
-    throw new Error(err2)
+    throwDurationError(value)
   }
   if (isNaN(num) || num < 0) {
-    var err3 = "Unrecognized duration: '" + value + "'." + DURATION_MSG
-    throw new Error(err3)
+    throwDurationError(value)
   }
   return num * mult
 }

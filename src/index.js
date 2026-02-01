@@ -101,6 +101,7 @@ AxiosRateLimit.prototype.setRateLimitOptions = function (options) {
   if (!options) return
   clearWindowsTimeouts(this.windows)
   this.windows = buildWindows(options)
+  this.shift()
 }
 
 AxiosRateLimit.prototype.enable = function (axios) {

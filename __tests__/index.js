@@ -214,7 +214,7 @@ it('parseDuration: invalid duration throws with format hint', function () {
   expect(function () {
     axiosRateLimit(
       axios.create({ adapter: adapter }),
-      { limits: [{ maxRequests: 1, duration: 'invalid' }] }
+      { limits: [{ maxRequests: 1, duration: -1 }] }
     )
   }).toThrow(/Unrecognized duration/)
   expect(function () {

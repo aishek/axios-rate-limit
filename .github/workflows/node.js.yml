@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-        node-version: [16, 18, 20, 22, 24, 25, 26]
+        node-version: [20, 22, 24, 25]
         # See supported Axios versions at https://www.npmjs.com/package/axios?activeTab=versions
         axios-version: [0, 1]
     env:

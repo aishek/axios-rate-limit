@@ -392,6 +392,31 @@ it('setRateLimitOptions clears previous window timeouts', async function () {
   await Promise.all([p1, p2, p3])
 })
 
+it('setRateLimitOptions processes queued reqs', async function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    {
+      limits: [
+        { maxRequests: 2, duration: '2s' },
+        { maxRequests: 1, duration: '200ms' }
+      ]
+    }
+  )
+  var onSuccess = sinon.spy()
+  var p1 = http.get('/users').then(onSuccess)
+  var p2 = http.get('/users').then(onSuccess)
+  await delay(10)
+  expect(onSuccess.callCount).toEqual(1)
+  expect(http.getQueue().length).toEqual(1)
+  await p1
+  expect(http.getQueue().length).toEqual(1)
+  http.setRateLimitOptions({ maxRequests: 2, perMilliseconds: 100 })
+  await p2
+  expect(onSuccess.callCount).toEqual(2)
+})
+
 it('blocked by full window with timeout triggers ref path', async function () {
   function adapter (config) { return Promise.resolve(config) }
 

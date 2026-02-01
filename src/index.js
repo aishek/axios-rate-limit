@@ -99,8 +99,9 @@ AxiosRateLimit.prototype.setMaxRPS = function (rps) {
 
 AxiosRateLimit.prototype.setRateLimitOptions = function (options) {
   if (!options) return
+  var newWindows = buildWindows(options)
   clearWindowsTimeouts(this.windows)
-  this.windows = buildWindows(options)
+  this.windows = newWindows
   this.shift()
 }
 

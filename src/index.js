@@ -38,9 +38,16 @@ function parseDuration (value) {
 function buildWindows (options) {
   var limits = options && options.limits
   if (limits && limits.length > 0) {
-    return limits.map(function (limit) {
+    return limits.map(function (limit, i) {
+      var max = limit.maxRequests
+      if (typeof max !== 'number' || !isFinite(max) || max <= 0) {
+        throw new Error(
+          'Invalid rate limit option at limits[' + i + ']: ' +
+          'maxRequests is required and must be a positive number.'
+        )
+      }
       var perMs = parseDuration(limit.duration)
-      return { count: 0, max: limit.maxRequests, perMs: perMs, timeoutId: null }
+      return { count: 0, max: max, perMs: perMs, timeoutId: null }
     })
   }
   var maxRequests = options.maxRequests
@@ -51,6 +58,20 @@ function buildWindows (options) {
   } else {
     var optD = options.duration
     perMs = optD != null ? parseDuration(optD) : options.perMilliseconds
+  }
+  if (typeof perMs !== 'number' || !isFinite(perMs) || perMs <= 0) {
+    throw new Error(
+      'Invalid rate limit options: one of maxRPS, duration, or ' +
+      'perMilliseconds is required and must be positive.'
+    )
+  }
+  var maxInvalid = typeof maxRequests !== 'number' ||
+    !isFinite(maxRequests) || maxRequests <= 0
+  if (maxInvalid) {
+    throw new Error(
+      'Invalid rate limit options: maxRequests is required and ' +
+      'must be a positive number.'
+    )
   }
   return [{ count: 0, max: maxRequests, perMs: perMs, timeoutId: null }]
 }

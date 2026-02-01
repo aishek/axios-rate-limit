@@ -47,6 +47,12 @@ function buildWindows (options) {
         )
       }
       var perMs = parseDuration(limit.duration)
+      if (typeof perMs !== 'number' || !isFinite(perMs) || perMs <= 0) {
+        throw new Error(
+          'Invalid rate limit option at limits[' + i + ']: ' +
+          'duration must be a positive finite number.'
+        )
+      }
       return { count: 0, max: max, perMs: perMs, timeoutId: null }
     })
   }

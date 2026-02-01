@@ -463,6 +463,28 @@ it('limits with maxRequests negative throws', function () {
   }).toThrow(/limits\[0\].*maxRequests is required/)
 })
 
+it('limits with duration 0 throws', function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  expect(function () {
+    axiosRateLimit(
+      axios.create({ adapter: adapter }),
+      { limits: [{ maxRequests: 5, duration: 0 }] }
+    )
+  }).toThrow(/duration must be a positive finite number/)
+})
+
+it('limits with duration Infinity throws', function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  expect(function () {
+    axiosRateLimit(
+      axios.create({ adapter: adapter }),
+      { limits: [{ maxRequests: 5, duration: Infinity }] }
+    )
+  }).toThrow(/duration must be a positive finite number/)
+})
+
 it('limits entry requires duration', async function () {
   function adapter (config) { return Promise.resolve(config) }
 

@@ -19,14 +19,14 @@ export interface RateLimitedAxiosInstance extends AxiosInstance {
 
 export type RateLimitEntry = {
     maxRequests: number,
-    duration: string
+    duration: string | number
 };
 
 export type rateLimitOptions = {
     maxRequests?: number,
     perMilliseconds?: number,
     maxRPS?: number,
-    duration?: string,
+    duration?: string | number,
     limits?: RateLimitEntry[]
 };
 

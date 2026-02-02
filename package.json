@@ -49,6 +49,7 @@
     "lint": "eslint-ci src/*.js __tests__/*.js"
   },
   "jest": {
+    "testPathIgnorePatterns": ["/__tests__/helpers\\.js$"],
     "verbose": true,
     "moduleFileExtensions": [
       "js"
@@ -57,7 +58,8 @@
       "node_modules"
     ],
     "coveragePathIgnorePatterns": [
-      "/node_modules/"
+      "/node_modules/",
+      "/__tests__/helpers\\.js$"
     ]
   },
   "eslintConfig": {

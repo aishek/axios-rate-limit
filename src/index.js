@@ -20,7 +20,7 @@ function parseDuration (value) {
   var mult
   if (s.length >= 2 && s.slice(-2) === 'ms') {
     num = parseFloat(s.slice(0, -2))
-    mult = 1
+    mult = DURATION_UNITS.ms
   } else if (s.length >= 1) {
     var u = s.slice(-1)
     mult = DURATION_UNITS[u]

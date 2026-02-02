@@ -2,6 +2,8 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+
+## 1.5.0
 * Multiple rate limits via optional `limits` array (see https://github.com/aishek/axios-rate-limit/issues/55). Each entry is `{ maxRequests, duration }`; `duration` is a string with numeric value + unit: `ms`, `s`, `m`, `h` (e.g. `'1s'`, `'2m'`). A request is sent only when every window allows one more; each window resets independently after its time. Invalid `duration` throws with a message hinting at valid formats.
 * Backward compatibility: if `limits` is not provided, behavior is unchanged (single limit via `maxRequests` + `perMilliseconds` or `maxRPS`). Legacy options `perMilliseconds`, `maxRPS` and existing single-limit API remain supported; `getMaxRPS` / `setMaxRPS` / `setRateLimitOptions` work as before in that mode.
 

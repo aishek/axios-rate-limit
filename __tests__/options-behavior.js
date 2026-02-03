@@ -121,3 +121,37 @@ it('single req with max 1 triggers unref when queue empty', async function () {
   await http.get('/users').then(onSuccess)
   expect(onSuccess.callCount).toEqual(1)
 })
+
+it('uses default array when queue option is omitted', function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    { maxRequests: 1, perMilliseconds: 1000 }
+  )
+  var queue = http.getQueue()
+  expect(Array.isArray(queue)).toEqual(true)
+  expect(queue).toEqual([])
+})
+
+it('uses custom queue when queue option is provided', async function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  var customQueue = []
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    { maxRequests: 1, perMilliseconds: 100, queue: customQueue }
+  )
+  expect(http.getQueue()).toBe(customQueue)
+
+  var onSuccess = sinon.spy()
+  var p1 = http.get('/users').then(onSuccess)
+  var p2 = http.get('/users').then(onSuccess)
+  await delay(10)
+  expect(onSuccess.callCount).toEqual(1)
+  expect(customQueue.length).toEqual(1)
+
+  await Promise.all([p1, p2])
+  expect(onSuccess.callCount).toEqual(2)
+  expect(customQueue.length).toEqual(0)
+})

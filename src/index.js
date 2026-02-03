@@ -92,8 +92,8 @@ function clearWindowsTimeouts (windows) {
   }
 }
 
-function AxiosRateLimit (axios) {
-  this.queue = []
+function AxiosRateLimit (axios, queue) {
+  this.queue = queue
   this.windows = []
 
   this.interceptors = {
@@ -253,10 +253,12 @@ AxiosRateLimit.prototype.shift = function () {
  * @param {Object} options options for rate limit, available for live update
  * @param {Number} options.maxRequests max requests to perform concurrently in given amount of time.
  * @param {Number} options.perMilliseconds amount of time to limit concurrent requests.
+ * @param {Object} options.queue optional queue (object with push, shift methods and length property).
  * @returns {Object} axios instance with interceptors added
  */
 function axiosRateLimit (axios, options) {
-  var rateLimitInstance = new AxiosRateLimit(axios)
+  var queue = (options && options.queue) || []
+  var rateLimitInstance = new AxiosRateLimit(axios, queue)
   if (options != null) {
     rateLimitInstance.setRateLimitOptions(options)
   }

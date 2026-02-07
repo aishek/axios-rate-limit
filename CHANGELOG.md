@@ -2,7 +2,9 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
-* Add `queue` option in case you will need to replace built-in array-based requests queue to any compatible object (see https://github.com/aishek/axios-rate-limit/issues/37). Please note that there is no validation for the option value. You have to implement push, shift methods and length property.
+
+## 1.6.0
+* Add `queue` option in case you will need to replace built-in array-based requests queue with any compatible object (see https://github.com/aishek/axios-rate-limit/issues/37). Please note that there is no validation for the option value. You have to implement push, shift methods and length property.
 
 ## 1.5.0
 * Multiple rate limits via optional `limits` array (see https://github.com/aishek/axios-rate-limit/issues/55). Each entry is `{ maxRequests, duration }`; `duration` is a string with numeric value + unit: `ms`, `s`, `m`, `h` (e.g. `'1s'`, `'2m'`). A request is sent only when every window allows one more; each window resets independently after its time. Invalid `duration` throws with a message hinting at valid formats.

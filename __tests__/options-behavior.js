@@ -44,6 +44,19 @@ it('setRateLimitOptions clears previous window timeouts', async function () {
   await Promise.all([p1, p2, p3])
 })
 
+it('setRateLimitOptions when window timeoutId already null', async function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    { maxRequests: 1, perMilliseconds: 50 }
+  )
+  await http.get('/users')
+  await delay(60)
+  http.setRateLimitOptions({ maxRequests: 2, perMilliseconds: 100 })
+  expect(http.getMaxRPS()).toEqual(20)
+})
+
 it('setRateLimitOptions processes queued reqs', async function () {
   function adapter (config) { return Promise.resolve(config) }
 
@@ -154,4 +167,64 @@ it('uses custom queue when queue option is provided', async function () {
   await Promise.all([p1, p2])
   expect(onSuccess.callCount).toEqual(2)
   expect(customQueue.length).toEqual(0)
+})
+
+it('calls timeout ref when blocked by full window', async function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  var realSetTimeout = global.setTimeout
+  var refSpy = sinon.spy()
+  function fakeSetTimeout (fn, ms) {
+    if (ms === 0) {
+      return realSetTimeout.apply(global, arguments)
+    }
+    realSetTimeout.apply(global, arguments)
+    return { ref: refSpy, unref: function () {} }
+  }
+  var setTimeoutStub =
+    sinon.stub(global, 'setTimeout').callsFake(fakeSetTimeout)
+
+  try {
+    var opts = { maxRequests: 1, perMilliseconds: 500 }
+    var http = axiosRateLimit(axios.create({ adapter: adapter }), opts)
+    var onSuccess = sinon.spy()
+    var p1 = http.get('/users').then(onSuccess)
+    var p2 = http.get('/users').then(onSuccess)
+    await delay(10)
+    expect(onSuccess.callCount).toEqual(1)
+    expect(http.getQueue().length).toEqual(1)
+    expect(refSpy.called).toEqual(true)
+    await delay(500)
+    await Promise.all([p1, p2])
+    expect(onSuccess.callCount).toEqual(2)
+  } finally {
+    setTimeoutStub.restore()
+  }
+})
+
+it('calls timeout unref when single req leaves queue empty', async function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  var realSetTimeout = global.setTimeout
+  var unrefSpy = sinon.spy()
+  function fakeSetTimeout (fn, ms) {
+    if (ms === 0) {
+      return realSetTimeout.apply(global, arguments)
+    }
+    realSetTimeout.apply(global, arguments)
+    return { ref: function () {}, unref: unrefSpy }
+  }
+  var setTimeoutStub =
+    sinon.stub(global, 'setTimeout').callsFake(fakeSetTimeout)
+
+  try {
+    var opts = { maxRequests: 1, perMilliseconds: 1000 }
+    var http = axiosRateLimit(axios.create({ adapter: adapter }), opts)
+    var onSuccess = sinon.spy()
+    await http.get('/users').then(onSuccess)
+    expect(onSuccess.callCount).toEqual(1)
+    expect(unrefSpy.called).toEqual(true)
+  } finally {
+    setTimeoutStub.restore()
+  }
 })

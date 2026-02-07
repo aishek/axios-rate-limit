@@ -65,3 +65,65 @@ it('not delay requests if requests are cancelled', async function () {
   expect(end - start).toBeLessThan(perMilliseconds * 2)
   expect(end - start).toBeGreaterThan(perMilliseconds)
 })
+
+it('reject if aborted via signal before executing', async function () {
+  var maxRequests = 1
+  function adapter (config) { return Promise.resolve(config) }
+
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    { maxRPS: maxRequests }
+  )
+
+  var onSuccess = sinon.spy()
+  var onFailure = sinon.spy()
+
+  var controller = new AbortController()
+  controller.abort('cancelled for testing')
+  await http.get('/users', { signal: controller.signal })
+    .then(onSuccess)
+    .catch(onFailure)
+
+  expect(onSuccess.callCount).toBe(0)
+  expect(onFailure.callCount).toBe(1)
+  expect(onFailure.firstCall.args[0]).toBeInstanceOf(Error)
+})
+
+it('not delay requests if requests are aborted via signal', async function () {
+  var maxRequests = 1
+  var perMilliseconds = 1000
+  var totalRequests = 4
+  function adapter (config) { return Promise.resolve(config) }
+
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    { maxRPS: maxRequests }
+  )
+
+  var onSuccess = sinon.spy()
+  var onFailure = sinon.spy()
+
+  var requests = []
+  var controllers = []
+  var start = Date.now()
+  for (var i = 0; i < totalRequests; i++) {
+    var controller = new AbortController()
+    requests.push(
+      http.get('/users', { signal: controller.signal })
+        .then(onSuccess)
+        .catch(onFailure)
+    )
+    controllers.push(controller)
+  }
+
+  expect(controllers.length).toBe(4)
+  controllers[1].abort('cancelled for testing')
+  controllers[2].abort('cancelled for testing')
+
+  await Promise.all(requests)
+  var end = Date.now()
+  expect(onSuccess.callCount).toEqual(2)
+  expect(onFailure.callCount).toEqual(2)
+  expect(end - start).toBeLessThan(perMilliseconds * 2)
+  expect(end - start).toBeGreaterThan(perMilliseconds)
+})

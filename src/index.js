@@ -237,11 +237,8 @@ AxiosRateLimit.prototype.shift = function () {
  *   import axios from 'axios';
  *   import rateLimit from 'axios-rate-limit';
  *
- *   // sets max 2 requests per 1 second, other will be delayed
- *   // note maxRPS is a shorthand for perMilliseconds: 1000, and it takes precedence
- *   // if specified both with maxRequests and perMilliseconds
- *   const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000, maxRPS: 2 })
-*    http.getMaxRPS() // 2
+ *   const http = rateLimit(axios.create(), { limits: [{ maxRequests: 2, duration: '1s' }] })
+ *   http.getMaxRPS() // 2
  *   http.get('https://example.com/api/v1/users.json?page=1') // will perform immediately
  *   http.get('https://example.com/api/v1/users.json?page=2') // will perform immediately
  *   http.get('https://example.com/api/v1/users.json?page=3') // will perform after 1 second from the first one
@@ -254,6 +251,9 @@ AxiosRateLimit.prototype.shift = function () {
  * @param {Number} options.maxRequests max requests to perform concurrently in given amount of time.
  * @param {Number} options.perMilliseconds amount of time to limit concurrent requests.
  * @param {Object} options.queue optional queue (object with push, shift methods and length property).
+ * @param {Object} options.limits optional array of rate limit entries.
+ * @param {Number} options.limits[].maxRequests max requests to perform concurrently in given amount of time.
+ * @param {String} options.limits[].duration duration of the rate limit window.
  * @returns {Object} axios instance with interceptors added
  */
 function axiosRateLimit (axios, options) {

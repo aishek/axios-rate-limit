@@ -155,6 +155,10 @@ function throwIfCancellationRequested (config) {
   if (config.cancelToken) {
     config.cancelToken.throwIfRequested()
   }
+  if (config.signal && config.signal.aborted) {
+    var reason = config.signal.reason
+    throw reason != null ? reason : new Error('canceled')
+  }
 }
 
 AxiosRateLimit.prototype.handleRequest = function (request) {

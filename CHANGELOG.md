@@ -2,6 +2,7 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+* Support cancellation via `config.signal` (AbortController) so aborted requests no longer consume a rate-limit slot.
 
 ## 1.6.0
 * Add `queue` option in case you will need to replace built-in array-based requests queue with any compatible object (see https://github.com/aishek/axios-rate-limit/issues/37). Please note that there is no validation for the option value. You have to implement push, shift methods and length property.

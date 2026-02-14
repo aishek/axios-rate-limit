@@ -2,6 +2,8 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+
+## 1.6.1
 * Support cancellation via `config.signal` (AbortController) so aborted requests no longer consume a rate-limit slot.
 
 ## 1.6.0

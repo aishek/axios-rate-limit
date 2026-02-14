@@ -33,6 +33,12 @@ http.getQueue()
 
 See [source code](https://github.com/aishek/axios-rate-limit/blob/master/src/index.js#L233-L258) for all available options.
 
+## Typical use cases
+
+- [Single rate limit](doc/use-case-single-rate-limit.md) — API enforces one limit; use one window via `limits`.
+- [Multiple rate limits](doc/use-case-multiple-rate-limits.md) — API enforces several limits (e.g. per second and per minute); use multiple windows.
+- [Custom queue](doc/use-case-custom-queue.md) — Pass your own queue (e.g. to log when requests are added or removed).
+
 ## Alternatives
 
 Consider using Axios built-in [rate-limiting](https://www.npmjs.com/package/axios#user-content--rate-limiting) functionality.

@@ -133,7 +133,9 @@ AxiosRateLimit.prototype.setRateLimitOptions = function (options) {
 }
 
 AxiosRateLimit.prototype.enable = function (axios) {
+  var self = this
   function handleError (error) {
+    self.shift()
     return Promise.reject(error)
   }
 

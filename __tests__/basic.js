@@ -48,6 +48,33 @@ it('throws an error', async function () {
   }
 })
 
+it('does not slow down on error when requests reject', async function () {
+  var maxRPS = 10
+  var totalRequests = 15
+  var maxSettleTimeMs = 1500
+  function adapter () { return Promise.reject(new Error('fail')) }
+
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    { maxRPS: maxRPS }
+  )
+
+  var start = Date.now()
+  var promises = []
+  for (var i = 0; i < totalRequests; i++) {
+    promises.push(http.get('/users').catch(function (err) { return err }))
+  }
+  var results = await Promise.all(promises)
+  var elapsed = Date.now() - start
+
+  expect(results.length).toEqual(totalRequests)
+  results.forEach(function (r) {
+    expect(r).toBeInstanceOf(Error)
+    expect(r.message).toEqual('fail')
+  })
+  expect(elapsed).toBeLessThan(maxSettleTimeMs)
+})
+
 it('support dynamic options', async function () {
   function adapter (config) { return Promise.resolve(config) }
 

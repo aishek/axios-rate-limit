@@ -3,6 +3,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 * Add "Typical use cases" section in README with links to doc files: single rate limit (`limits` with one entry; note deprecated top-level params), multiple rate limits, custom queue (e.g. logging add/remove).
+* Add [doc/jest-mocking.md](doc/jest-mocking.md) for mocking axios-rate-limit in Jest (see [issue #51](https://github.com/aishek/axios-rate-limit/issues/51)), and `__tests__/jest-mocking-example.js` to verify the approach.
 
 ## 1.6.1
 * Support cancellation via `config.signal` (AbortController) so aborted requests no longer consume a rate-limit slot.

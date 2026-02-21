@@ -145,3 +145,12 @@ it('limits with duration Infinity throws', function () {
     )
   }).toThrow(/duration must be a positive finite number/)
 })
+
+it('_clearWindowsTimeouts with null returns without throwing', function () {
+  expect(function () {
+    axiosRateLimit._clearWindowsTimeouts(null)
+  }).not.toThrow()
+  expect(function () {
+    axiosRateLimit._clearWindowsTimeouts(undefined)
+  }).not.toThrow()
+})

@@ -111,6 +111,28 @@ it('reject with Error(canceled) when signal has no reason', async function () {
   expect(onFailure.firstCall.args[0]).toEqual(new Error('canceled'))
 })
 
+it('reject with signal.reason when reason is non-null', async function () {
+  var maxRequests = 1
+  function adapter (config) { return Promise.resolve(config) }
+
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    { maxRPS: maxRequests }
+  )
+
+  var onSuccess = sinon.spy()
+  var onFailure = sinon.spy()
+  var myReason = new Error('aborted')
+  var signal = { aborted: true, reason: myReason }
+  await http.get('/users', { signal: signal })
+    .then(onSuccess)
+    .catch(onFailure)
+
+  expect(onSuccess.callCount).toBe(0)
+  expect(onFailure.callCount).toBe(1)
+  expect(onFailure.firstCall.args[0]).toBe(myReason)
+})
+
 it('not delay requests if requests are aborted via signal', async function () {
   var maxRequests = 1
   var perMilliseconds = 1000

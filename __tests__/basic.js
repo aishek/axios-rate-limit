@@ -103,6 +103,20 @@ it('does not double shift on request interceptor reject', async function () {
   expect(maxConcurrent).toBe(1)
 })
 
+it('request interceptor error handler propagates rejection', async function () {
+  var requestRejected = new Error('request rejected')
+  function adapter (config) { return Promise.resolve(config) }
+  var axiosInstance = axios.create({ adapter: adapter })
+  var http = axiosRateLimit(axiosInstance, { maxRPS: 1 })
+  axiosInstance.interceptors.request.use(function () {
+    return Promise.reject(requestRejected)
+  })
+  var caught
+  await http.get('/any').catch(function (err) { caught = err })
+  expect(caught).toBe(requestRejected)
+  expect(caught.message).toBe('request rejected')
+})
+
 it('support dynamic options', async function () {
   function adapter (config) { return Promise.resolve(config) }
 

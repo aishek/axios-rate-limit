@@ -277,4 +277,5 @@ function axiosRateLimit (axios, options) {
   return axios
 }
 
+axiosRateLimit._clearWindowsTimeouts = clearWindowsTimeouts
 module.exports = axiosRateLimit

@@ -75,6 +75,34 @@ it('does not slow down on error when requests reject', async function () {
   expect(elapsed).toBeLessThan(maxSettleTimeMs)
 })
 
+it('does not double shift on request interceptor reject', async function () {
+  var concurrent = 0
+  var maxConcurrent = 0
+  function adapter (config) {
+    concurrent++
+    if (concurrent > maxConcurrent) maxConcurrent = concurrent
+    return delay(50).then(function () {
+      concurrent--
+      return config
+    })
+  }
+  var axiosInstance = axios.create({ adapter: adapter })
+  axiosInstance.interceptors.request.use(function (config) {
+    if (config.url === '/reject') return Promise.reject(new Error('reject'))
+    return config
+  })
+  var opts = { maxRequests: 1, perMilliseconds: 1000 }
+  var http = axiosRateLimit(axiosInstance, opts)
+
+  var p1 = http.get('/first').catch(function (e) { return e })
+  var p2 = http.get('/second').catch(function (e) { return e })
+  var p3 = http.get('/reject').catch(function (e) { return e })
+
+  await Promise.all([p1, p2, p3])
+
+  expect(maxConcurrent).toBe(1)
+})
+
 it('support dynamic options', async function () {
   function adapter (config) { return Promise.resolve(config) }
 

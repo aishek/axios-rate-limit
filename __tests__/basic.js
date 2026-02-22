@@ -184,3 +184,27 @@ it('support dynamic options', async function () {
   expect(onSuccess.callCount).toEqual(4)
   expect(end - start).toBeGreaterThan(1000)
 })
+
+it('releases full batch when window resets (issue 63)', async function () {
+  var dispatchTimes = []
+  var adapterDelay = 25
+  function adapter (config) {
+    dispatchTimes.push(Date.now())
+    return delay(adapterDelay).then(function () { return config })
+  }
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    { maxRequests: 2, perMilliseconds: 50 }
+  )
+  var onSuccess = sinon.spy()
+  var promises = []
+  for (var i = 0; i < 4; i++) {
+    promises.push(http.get('/users').then(onSuccess))
+  }
+  await delay(60)
+  await Promise.all(promises)
+  expect(dispatchTimes.length).toEqual(4)
+  expect(onSuccess.callCount).toEqual(4)
+  var thirdFourthGap = dispatchTimes[3] - dispatchTimes[2]
+  expect(thirdFourthGap).toBeLessThan(15)
+})

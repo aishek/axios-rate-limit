@@ -227,6 +227,18 @@ AxiosRateLimit.prototype.shift = function () {
         win.count = 0
         win.timeoutId = null
         self.shift()
+        var wins = self.windows
+        while (self.queue.length) {
+          var blocked = false
+          for (var k = 0; k < wins.length; k++) {
+            if (wins[k].count >= wins[k].max) {
+              blocked = true
+              break
+            }
+          }
+          if (blocked) break
+          self.shift()
+        }
       }.bind(null, w), w.perMs)
       if (typeof w.timeoutId.unref === 'function') {
         if (this.queue.length === 0) w.timeoutId.unref()

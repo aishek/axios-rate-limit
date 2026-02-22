@@ -2,6 +2,7 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+* Fix max requests only on the first loop issue (see https://github.com/aishek/axios-rate-limit/issues/63)
 
 ## 1.6.2
 * Add "Typical use cases" section in README with links to doc files: single rate limit (`limits` with one entry; note deprecated top-level params), multiple rate limits, custom queue (e.g. logging add/remove).

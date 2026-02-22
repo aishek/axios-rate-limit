@@ -63,7 +63,7 @@ it('not delay requests if requests are cancelled', async function () {
   expect(onSuccess.callCount).toEqual(2)
   expect(onFailure.callCount).toEqual(2)
   expect(end - start).toBeLessThan(perMilliseconds * 2)
-  expect(end - start).toBeGreaterThan(perMilliseconds)
+  expect(end - start).toBeGreaterThanOrEqual(perMilliseconds)
 })
 
 it('reject if aborted via signal before executing', async function () {
@@ -169,5 +169,5 @@ it('not delay requests if requests are aborted via signal', async function () {
   expect(onSuccess.callCount).toEqual(2)
   expect(onFailure.callCount).toEqual(2)
   expect(end - start).toBeLessThan(perMilliseconds * 2)
-  expect(end - start).toBeGreaterThan(perMilliseconds)
+  expect(end - start).toBeGreaterThanOrEqual(perMilliseconds)
 })

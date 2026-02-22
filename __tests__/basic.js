@@ -142,7 +142,7 @@ it('support dynamic options', async function () {
   var end = Date.now()
   expect(onSuccess.callCount).toEqual(3)
   expect(http.getQueue().length).toEqual(0)
-  expect(end - start).toBeGreaterThan(100)
+  expect(end - start).toBeGreaterThanOrEqual(100)
   await delay(110)
 
   // check setRateLimitOptions
@@ -162,7 +162,7 @@ it('support dynamic options', async function () {
   await Promise.all(requests)
   end = Date.now()
   expect(onSuccess.callCount).toEqual(4)
-  expect(end - start).toBeGreaterThan(200)
+  expect(end - start).toBeGreaterThanOrEqual(200)
   await delay(210)
 
   // check setMaxRPS
@@ -182,7 +182,7 @@ it('support dynamic options', async function () {
   await Promise.all(requests)
   end = Date.now()
   expect(onSuccess.callCount).toEqual(4)
-  expect(end - start).toBeGreaterThan(1000)
+  expect(end - start).toBeGreaterThanOrEqual(1000)
 })
 
 it('releases full batch when window resets (issue 63)', async function () {

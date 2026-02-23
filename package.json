@@ -15,6 +15,7 @@
     "axios": ">=0.18.0"
   },
   "devDependencies": {
+    "axios-retry": "^4.0.0",
     "axios0": "npm:axios@^0.28.1",
     "axios1": "npm:axios@^1.0.0",
     "@logux/eslint-config": "28.1.0",

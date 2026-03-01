@@ -5,7 +5,7 @@ export type RateLimitRequestHandler = {
 }
 
 export interface RateLimitedAxiosInstance extends AxiosInstance {
-    getQueue: () => RateLimitRequestHandler[],
+    getQueue: () => RateLimitRequestHandler[] | Queue,
     getMaxRPS: () => number,
     setMaxRPS: (rps: number) => void,
     setRateLimitOptions: (options?: rateLimitOptions) => void,

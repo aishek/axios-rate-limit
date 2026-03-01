@@ -222,6 +222,7 @@ AxiosRateLimit.prototype.shift = function () {
       }
 
       return Promise.resolve(self.queue.shift()).then(function (queued) {
+        if (queued == null) return undefined
         var resolved = queued.resolve()
 
         if (!resolved) {

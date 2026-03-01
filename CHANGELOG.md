@@ -2,6 +2,8 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+
+## 1.6.3
 * Fix max requests only on the first loop issue (see https://github.com/aishek/axios-rate-limit/issues/63)
 
 ## 1.6.2

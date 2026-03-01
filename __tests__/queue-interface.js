@@ -39,7 +39,7 @@ it('works with sync custom queue (push, shift, length)', async function () {
   expect(syncQueue.length).toEqual(0)
 })
 
-it.skip('works with async custom queue', async function () {
+it('works with async custom queue', async function () {
   function adapter (config) { return Promise.resolve(config) }
 
   var backing = []

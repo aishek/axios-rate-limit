@@ -1,8 +1,8 @@
 # Use case: custom queue
 
-The library accepts an optional `queue` option: an object implementing the queue interface Q. You can replace the default array with a custom implementation (e.g. to log when requests are added to and removed from the queue, or to use async storage such as Redis). There is no validation for the option; the caller must implement the contract correctly.
+The library accepts an optional `queue` option: an object implementing the queue interface. You can replace the default array with a custom implementation (e.g. to log when requests are added to and removed from the queue, or to use async storage such as Redis). There is no validation for the option; the caller must implement the contract correctly.
 
-**Queue interface Q:** An object with:
+**Queue interface:** An object with:
 
 - `push(item)` — add an item to the queue. May return `void` or `Promise<void>`.
 - `shift()` — remove and return the next item. May return the item or `Promise<item>`.
@@ -71,4 +71,4 @@ http.get('https://api.example.com/users');
 http.get('https://api.example.com/users/1');
 ```
 
-See [source code](https://github.com/aishek/axios-rate-limit/blob/master/src/index.js#L233-L258) for all available options.
+See [source code](https://github.com/aishek/axios-rate-limit/blob/master/src/index.js#L273-L301) for all available options.

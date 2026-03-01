@@ -92,9 +92,21 @@ function clearWindowsTimeouts (windows) {
   }
 }
 
+function getQueueLength (queue) {
+  if (typeof queue.getLength === 'function') {
+    return Promise.resolve(queue.getLength())
+  }
+  return Promise.resolve(queue.length)
+}
+
+function isAsyncQueue (queue) {
+  return typeof queue.getLength === 'function'
+}
+
 function AxiosRateLimit (axios, queue) {
   this.queue = queue
   this.windows = []
+  this._shiftPromise = Promise.resolve()
 
   this.interceptors = {
     request: null,
@@ -129,7 +141,7 @@ AxiosRateLimit.prototype.setRateLimitOptions = function (options) {
   var newWindows = buildWindows(options)
   clearWindowsTimeouts(this.windows)
   this.windows = newWindows
-  this.shift()
+  this.shift().catch(function () {})
 }
 
 AxiosRateLimit.prototype.enable = function (axios) {
@@ -142,7 +154,7 @@ AxiosRateLimit.prototype.enable = function (axios) {
   this.interceptors.response = axios.interceptors.response.use(
     this.handleResponse,
     function (error) {
-      self.shift()
+      self.shift().catch(function () {})
       return Promise.reject(error)
     }
   )
@@ -163,12 +175,9 @@ function throwIfCancellationRequested (config) {
 }
 
 AxiosRateLimit.prototype.handleRequest = function (request) {
+  var self = this
   return new Promise(function (resolve, reject) {
-    this.push({
-      /*
-       * rejects a cancelled request and returns request has been resolved or not
-       * @returns {boolean}
-       */
+    var handler = {
       resolve: function () {
         try {
           throwIfCancellationRequested(request)
@@ -179,72 +188,88 @@ AxiosRateLimit.prototype.handleRequest = function (request) {
         resolve(request)
         return true
       }
-    })
-  }.bind(this))
+    }
+    Promise.resolve(self.queue.push(handler)).then(function () {
+      self.shiftInitial()
+    }).catch(reject)
+  })
 }
 
 AxiosRateLimit.prototype.handleResponse = function (response) {
-  this.shift()
-  return response
-}
-
-AxiosRateLimit.prototype.push = function (requestHandler) {
-  this.queue.push(requestHandler)
-  this.shiftInitial()
+  var self = this
+  return Promise.resolve(self.shift()).then(function () { return response })
 }
 
 AxiosRateLimit.prototype.shiftInitial = function () {
-  setTimeout(function () { return this.shift() }.bind(this), 0)
+  var self = this
+  setTimeout(function () { self.shift().catch(function () {}) }, 0)
 }
 
 AxiosRateLimit.prototype.shift = function () {
-  if (!this.queue.length) return
-  var windows = this.windows
-  for (var i = 0; i < windows.length; i++) {
-    if (windows[i].count === windows[i].max) {
-      var tid = windows[i].timeoutId
-      if (tid && typeof tid.ref === 'function') {
-        tid.ref()
-      }
-      return
-    }
-  }
-
-  var queued = this.queue.shift()
-  var resolved = queued.resolve()
-
-  if (!resolved) {
-    this.shift()
-    return
-  }
-
   var self = this
-  for (var j = 0; j < windows.length; j++) {
-    var w = windows[j]
-    w.count += 1
-    if (w.count === 1) {
-      w.timeoutId = setTimeout(function (win) {
-        win.count = 0
-        win.timeoutId = null
-        self.shift()
-        var wins = self.windows
-        while (self.queue.length) {
-          var blocked = false
-          for (var k = 0; k < wins.length; k++) {
-            if (wins[k].count >= wins[k].max) {
-              blocked = true
-              break
+  function doShift () {
+    return getQueueLength(self.queue).then(function (len) {
+      if (!len) return undefined
+      var windows = self.windows
+      for (var i = 0; i < windows.length; i++) {
+        if (windows[i].count === windows[i].max) {
+          var tid = windows[i].timeoutId
+          if (tid && typeof tid.ref === 'function') {
+            tid.ref()
+          }
+          return undefined
+        }
+      }
+
+      return Promise.resolve(self.queue.shift()).then(function (queued) {
+        if (queued == null) return undefined
+        var resolved = queued.resolve()
+
+        if (!resolved) {
+          return self.shift()
+        }
+
+        for (var j = 0; j < windows.length; j++) {
+          var w = windows[j]
+          w.count += 1
+          if (w.count === 1) {
+            w.timeoutId = setTimeout(function (win) {
+              win.count = 0
+              win.timeoutId = null
+              function next () {
+                getQueueLength(self.queue).then(function (queueLen) {
+                  if (!queueLen) return
+                  var wins = self.windows
+                  var blocked = false
+                  for (var k = 0; k < wins.length; k++) {
+                    if (wins[k].count >= wins[k].max) {
+                      blocked = true
+                      break
+                    }
+                  }
+                  if (blocked) return
+                  self.shift().then(next).catch(function () {})
+                })
+              }
+              next()
+            }.bind(null, w), w.perMs)
+            if (typeof w.timeoutId.unref === 'function') {
+              getQueueLength(self.queue).then(function (queueLen) {
+                if (queueLen === 0) w.timeoutId.unref()
+              })
             }
           }
-          if (blocked) break
-          self.shift()
         }
-      }.bind(null, w), w.perMs)
-      if (typeof w.timeoutId.unref === 'function') {
-        if (this.queue.length === 0) w.timeoutId.unref()
-      }
-    }
+        return undefined
+      })
+    })
   }
+  if (isAsyncQueue(self.queue)) {
+    var p = self._shiftPromise.then(doShift)
+    self._shiftPromise = p.catch(function () {})
+    return p
+  }
+  return doShift()
 }
 
 /**
@@ -267,7 +292,7 @@ AxiosRateLimit.prototype.shift = function () {
  * @param {Object} options options for rate limit, available for live update
  * @param {Number} options.maxRequests max requests to perform concurrently in given amount of time.
  * @param {Number} options.perMilliseconds amount of time to limit concurrent requests.
- * @param {Object} options.queue optional queue (object with push, shift methods and length property).
+ * @param {Object} options.queue optional queue (push, shift; length or getLength()). May be sync or async.
  * @param {Object} options.limits optional array of rate limit entries.
  * @param {Number} options.limits[].maxRequests max requests to perform concurrently in given amount of time.
  * @param {String} options.limits[].duration duration of the rate limit window.

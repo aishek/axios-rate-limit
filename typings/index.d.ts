@@ -22,12 +22,20 @@ export type RateLimitEntry = {
     duration: string | number
 };
 
+export interface Queue<T = RateLimitRequestHandler> {
+    push(item: T): void | Promise<void>;
+    shift(): T | undefined | Promise<T | undefined>;
+    length?: number;
+    getLength?(): number | Promise<number>;
+}
+
 export type rateLimitOptions = {
     maxRequests?: number,
     perMilliseconds?: number,
     maxRPS?: number,
     duration?: string | number,
-    limits?: RateLimitEntry[]
+    limits?: RateLimitEntry[],
+    queue?: Queue
 };
 
  /**

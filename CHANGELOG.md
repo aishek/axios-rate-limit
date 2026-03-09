@@ -3,6 +3,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+* Allow sharing a single rate limiter instance between multiple axios clients via `getLimiter` and the `rateLimiter` option, mirroring the behavior from upstream PR #76.
+
 ## 1.7.0
 * Queue interface supports both synchronous and asynchronous implementations: `push` and `shift` may return a value or a Promise; length may be a `length` property or a `getLength()` method returning number or Promise of number. The library normalizes with `Promise.resolve`, so existing sync queues (default array or custom object with `push`, `shift`, `length`) remain valid and unchanged. Use `getLength()` when length is determined asynchronously (e.g. Redis). See [doc/use-case-custom-queue.md](doc/use-case-custom-queue.md).
 

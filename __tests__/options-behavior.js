@@ -228,3 +228,51 @@ it('calls timeout unref when single req leaves queue empty', async function () {
     setTimeoutStub.restore()
   }
 })
+
+it('creates limiter when options are omitted', async function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  var http = axiosRateLimit(axios.create({ adapter: adapter }))
+  expect(http.getMaxRPS()).toEqual(0)
+
+  var onSuccess = sinon.spy()
+  await http.get('/users').then(onSuccess)
+  expect(onSuccess.callCount).toEqual(1)
+  expect(http.getQueue().length).toEqual(0)
+})
+
+it('can share a limiter between multiple axios instances', async function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  var limiter = axiosRateLimit.getLimiter({
+    maxRequests: 2, perMilliseconds: 100
+  })
+
+  var http1 = limiter.enable(axios.create({ adapter: adapter }))
+  var http2 = axiosRateLimit(
+    axios.create({ adapter: adapter }), { rateLimiter: limiter }
+  )
+
+  var onSuccess = sinon.spy()
+
+  var requests = []
+  requests.push(http1.get('/users/1').then(onSuccess))
+  requests.push(http1.get('/users/2').then(onSuccess))
+  requests.push(http2.get('/users/3').then(onSuccess))
+  requests.push(http2.get('/users/4').then(onSuccess))
+
+  await delay(90)
+  expect(onSuccess.callCount).toEqual(2)
+  await Promise.all(requests)
+  expect(onSuccess.callCount).toEqual(4)
+})
+
+it('getLimiter without options uses default queue', function () {
+  function adapter (config) { return Promise.resolve(config) }
+
+  var limiter = axiosRateLimit.getLimiter()
+  var axiosInstance = axios.create({ adapter: adapter })
+  var http = limiter.enable(axiosInstance)
+
+  expect(http.getQueue()).toEqual([])
+})

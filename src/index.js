@@ -103,20 +103,13 @@ function isAsyncQueue (queue) {
   return typeof queue.getLength === 'function'
 }
 
-function AxiosRateLimit (axios, queue) {
+function AxiosRateLimit (queue) {
   this.queue = queue
   this.windows = []
   this._shiftPromise = Promise.resolve()
 
-  this.interceptors = {
-    request: null,
-    response: null
-  }
-
   this.handleRequest = this.handleRequest.bind(this)
   this.handleResponse = this.handleResponse.bind(this)
-
-  this.enable(axios)
 }
 
 AxiosRateLimit.prototype.getMaxRPS = function () {
@@ -147,17 +140,38 @@ AxiosRateLimit.prototype.setRateLimitOptions = function (options) {
 AxiosRateLimit.prototype.enable = function (axios) {
   var self = this
 
-  this.interceptors.request = axios.interceptors.request.use(
-    this.handleRequest,
+  function handleError (error) {
+    self.shift().catch(function () {})
+    return Promise.reject(error)
+  }
+
+  axios.interceptors.request.use(
+    function (request) {
+      return self.handleRequest(request)
+    },
     function (error) { return Promise.reject(error) }
   )
-  this.interceptors.response = axios.interceptors.response.use(
-    this.handleResponse,
-    function (error) {
-      self.shift().catch(function () {})
-      return Promise.reject(error)
-    }
+  axios.interceptors.response.use(
+    function (response) {
+      return self.handleResponse(response)
+    },
+    handleError
   )
+
+  axios.getQueue = function () {
+    return self.getQueue()
+  }
+  axios.getMaxRPS = function () {
+    return self.getMaxRPS()
+  }
+  axios.setMaxRPS = function (rps) {
+    self.setMaxRPS(rps)
+  }
+  axios.setRateLimitOptions = function (options) {
+    self.setRateLimitOptions(options)
+  }
+
+  return axios
 }
 
 /*
@@ -300,19 +314,29 @@ AxiosRateLimit.prototype.shift = function () {
  */
 function axiosRateLimit (axios, options) {
   var queue = (options && options.queue) || []
-  var rateLimitInstance = new AxiosRateLimit(axios, queue)
+  var rateLimitInstance
+  if (options && options.rateLimiter) {
+    rateLimitInstance = options.rateLimiter
+  } else {
+    rateLimitInstance = new AxiosRateLimit(queue)
+    if (options != null) {
+      rateLimitInstance.setRateLimitOptions(options)
+    }
+  }
+
+  return rateLimitInstance.enable(axios)
+}
+
+function getLimiter (options) {
+  var queue = (options && options.queue) || []
+  var rateLimitInstance = new AxiosRateLimit(queue)
   if (options != null) {
     rateLimitInstance.setRateLimitOptions(options)
   }
-
-  axios.getQueue = AxiosRateLimit.prototype.getQueue.bind(rateLimitInstance)
-  axios.getMaxRPS = AxiosRateLimit.prototype.getMaxRPS.bind(rateLimitInstance)
-  axios.setMaxRPS = AxiosRateLimit.prototype.setMaxRPS.bind(rateLimitInstance)
-  axios.setRateLimitOptions = AxiosRateLimit.prototype.setRateLimitOptions
-    .bind(rateLimitInstance)
-
-  return axios
+  return rateLimitInstance
 }
 
 axiosRateLimit._clearWindowsTimeouts = clearWindowsTimeouts
 module.exports = axiosRateLimit
+module.exports.AxiosRateLimiter = AxiosRateLimit
+module.exports.getLimiter = getLimiter

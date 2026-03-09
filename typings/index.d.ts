@@ -4,7 +4,7 @@ export type RateLimitRequestHandler = {
   resolve: () => boolean
 }
 
-export interface RateLimitedAxiosInstance extends AxiosInstance {
+export interface RateLimiter {
     getQueue: () => RateLimitRequestHandler[] | Queue,
     getMaxRPS: () => number,
     setMaxRPS: (rps: number) => void,
@@ -16,6 +16,8 @@ export interface RateLimitedAxiosInstance extends AxiosInstance {
     // shiftInitial():any,
     // shift():any
 }
+
+export interface RateLimitedAxiosInstance extends AxiosInstance, RateLimiter {}
 
 export type RateLimitEntry = {
     maxRequests: number,
@@ -37,6 +39,15 @@ export type rateLimitOptions = {
     limits?: RateLimitEntry[],
     queue?: Queue
 };
+
+export interface AxiosRateLimiter extends RateLimiter {}
+
+export class AxiosRateLimiter implements RateLimiter {
+    constructor(options: rateLimitOptions);
+    enable(axios: AxiosInstance): RateLimitedAxiosInstance;
+}
+
+export function getLimiter (options: rateLimitOptions): AxiosRateLimiter;
 
  /**
   * Apply rate limit to axios instance.
@@ -65,5 +76,5 @@ export type rateLimitOptions = {
   */
 export default function axiosRateLimit(
     axiosInstance: AxiosInstance,
-    options?: rateLimitOptions
+    options?: rateLimitOptions & { rateLimiter?: AxiosRateLimiter }
 ): RateLimitedAxiosInstance;

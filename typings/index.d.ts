@@ -74,7 +74,9 @@ export function getLimiter (options: rateLimitOptions): AxiosRateLimiter;
   * @param {Number} options.perMilliseconds amount of time to limit concurrent requests.
   * @returns {Object} axios instance with interceptors added
   */
-export default function axiosRateLimit(
+declare function axiosRateLimit(
     axiosInstance: AxiosInstance,
     options?: rateLimitOptions & { rateLimiter?: AxiosRateLimiter }
 ): RateLimitedAxiosInstance;
+
+export = axiosRateLimit;

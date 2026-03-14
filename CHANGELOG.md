@@ -2,6 +2,7 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+* Add `shouldCountRequest(config, response)` option: when it returns false the limiter refunds one slot (e.g. for cached responses). Enables integration with axios-cache-adapter so cache hits do not consume the rate limit. See [issue #43](https://github.com/aishek/axios-rate-limit/issues/43) and [doc/use-case-axios-cache-adapter.md](doc/use-case-axios-cache-adapter.md).
 
 ## 1.8.0
 * Fix type declaration to support all module resolution strategies by @janvennemann, see https://github.com/aishek/axios-rate-limit/pull/92

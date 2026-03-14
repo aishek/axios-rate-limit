@@ -3,6 +3,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## 1.8.0
 * Fix type declaration to support all module resolution strategies by @janvennemann, see https://github.com/aishek/axios-rate-limit/pull/92
 * Allow sharing a single rate limiter instance between multiple axios clients via `getLimiter` and the `rateLimiter` option, mirroring the behavior from upstream PR #76.
 

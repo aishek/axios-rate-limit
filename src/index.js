@@ -131,6 +131,7 @@ AxiosRateLimit.prototype.setMaxRPS = function (rps) {
 
 AxiosRateLimit.prototype.setRateLimitOptions = function (options) {
   if (!options) return
+  this._shouldCountRequest = options.shouldCountRequest
   var newWindows = buildWindows(options)
   clearWindowsTimeouts(this.windows)
   this.windows = newWindows
@@ -211,6 +212,16 @@ AxiosRateLimit.prototype.handleRequest = function (request) {
 
 AxiosRateLimit.prototype.handleResponse = function (response) {
   var self = this
+  if (typeof self._shouldCountRequest === 'function') {
+    try {
+      if (self._shouldCountRequest(response.config, response) === false) {
+        for (var i = 0; i < self.windows.length; i++) {
+          var w = self.windows[i]
+          w.count = Math.max(0, w.count - 1)
+        }
+      }
+    } catch (e) {}
+  }
   return Promise.resolve(self.shift()).then(function () { return response })
 }
 
@@ -310,6 +321,7 @@ AxiosRateLimit.prototype.shift = function () {
  * @param {Object} options.limits optional array of rate limit entries.
  * @param {Number} options.limits[].maxRequests max requests to perform concurrently in given amount of time.
  * @param {String} options.limits[].duration duration of the rate limit window.
+ * @param {Function} options.shouldCountRequest optional predicate (config, response) => boolean; when false the limiter refunds one slot (e.g. for cached responses). Omitted or true means count.
  * @returns {Object} axios instance with interceptors added
  */
 function axiosRateLimit (axios, options) {

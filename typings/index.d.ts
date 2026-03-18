@@ -1,4 +1,4 @@
-import { AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
 
 export type RateLimitRequestHandler = {
   resolve: () => boolean
@@ -17,7 +17,7 @@ export interface RateLimiter {
     // shift():any
 }
 
-export interface RateLimitedAxiosInstance extends AxiosInstance, RateLimiter {}
+export type RateLimitedAxiosInstance<T = AxiosInstance> = T & RateLimiter;
 
 export type RateLimitEntry = {
     maxRequests: number,
@@ -40,11 +40,8 @@ export type rateLimitOptions = {
     queue?: Queue
 };
 
-export interface AxiosRateLimiter extends RateLimiter {}
-
-export class AxiosRateLimiter implements RateLimiter {
-    constructor(options: rateLimitOptions);
-    enable(axios: AxiosInstance): RateLimitedAxiosInstance;
+export interface AxiosRateLimiter extends RateLimiter {
+    enable<T>(axios: T): RateLimitedAxiosInstance<T>;
 }
 
 export function getLimiter (options: rateLimitOptions): AxiosRateLimiter;
@@ -59,8 +56,8 @@ export function getLimiter (options: rateLimitOptions): AxiosRateLimiter;
   *   // sets max 2 requests per 1 second, other will be delayed
   *   // note maxRPS is a shorthand for perMilliseconds: 1000, and it takes precedence
   *   // if specified both with maxRequests and perMilliseconds
-  *   const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000, maxRPS: 2 })
- *    http.getMaxRPS() // 2
+ *   const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000, maxRPS: 2 })
+ *   http.getMaxRPS() // 2
   *   http.get('https://example.com/api/v1/users.json?page=1') // will perform immediately
   *   http.get('https://example.com/api/v1/users.json?page=2') // will perform immediately
   *   http.get('https://example.com/api/v1/users.json?page=3') // will perform after 1 second from the first one
@@ -74,9 +71,9 @@ export function getLimiter (options: rateLimitOptions): AxiosRateLimiter;
   * @param {Number} options.perMilliseconds amount of time to limit concurrent requests.
   * @returns {Object} axios instance with interceptors added
   */
-declare function axiosRateLimit(
-    axiosInstance: AxiosInstance,
+declare function axiosRateLimit<T = AxiosInstance>(
+    axiosInstance: T,
     options?: rateLimitOptions & { rateLimiter?: AxiosRateLimiter }
-): RateLimitedAxiosInstance;
+): RateLimitedAxiosInstance<T>;
 
 export = axiosRateLimit;

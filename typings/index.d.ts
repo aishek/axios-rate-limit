@@ -56,8 +56,8 @@ export function getLimiter (options: rateLimitOptions): AxiosRateLimiter;
   *   // sets max 2 requests per 1 second, other will be delayed
   *   // note maxRPS is a shorthand for perMilliseconds: 1000, and it takes precedence
   *   // if specified both with maxRequests and perMilliseconds
- *   const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000, maxRPS: 2 })
- *   http.getMaxRPS() // 2
+  *   const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000, maxRPS: 2 })
+  *   http.getMaxRPS() // 2
   *   http.get('https://example.com/api/v1/users.json?page=1') // will perform immediately
   *   http.get('https://example.com/api/v1/users.json?page=2') // will perform immediately
   *   http.get('https://example.com/api/v1/users.json?page=3') // will perform after 1 second from the first one

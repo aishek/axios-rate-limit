@@ -1,37 +1,31 @@
 import type { AxiosInstance } from 'axios';
 
-export type RateLimitRequestHandler = {
+type RateLimitRequestHandler = {
   resolve: () => boolean
 }
 
-export interface RateLimiter {
+interface RateLimiter {
     getQueue: () => RateLimitRequestHandler[] | Queue,
     getMaxRPS: () => number,
     setMaxRPS: (rps: number) => void,
     setRateLimitOptions: (options?: rateLimitOptions) => void,
-    // enable(axios: any): void,
-    // handleRequest(request:any):any,
-    // handleResponse(response: any): any,
-    // push(requestHandler:any):any,
-    // shiftInitial():any,
-    // shift():any
 }
 
-export type RateLimitedAxiosInstance<T = AxiosInstance> = T & RateLimiter;
+type RateLimitedAxiosInstance<T = AxiosInstance> = T & RateLimiter;
 
-export type RateLimitEntry = {
+type RateLimitEntry = {
     maxRequests: number,
     duration: string | number
 };
 
-export interface Queue<T = RateLimitRequestHandler> {
+interface Queue<T = RateLimitRequestHandler> {
     push(item: T): void | Promise<void>;
     shift(): T | undefined | Promise<T | undefined>;
     length?: number;
     getLength?(): number | Promise<number>;
 }
 
-export type rateLimitOptions = {
+type rateLimitOptions = {
     maxRequests?: number,
     perMilliseconds?: number,
     maxRPS?: number,
@@ -40,11 +34,14 @@ export type rateLimitOptions = {
     queue?: Queue
 };
 
-export interface AxiosRateLimiter extends RateLimiter {
+interface AxiosRateLimiter extends RateLimiter {
     enable<T>(axios: T): RateLimitedAxiosInstance<T>;
 }
 
-export function getLimiter (options: rateLimitOptions): AxiosRateLimiter;
+interface AxiosRateLimiterConstructor {
+    new (queue?: Queue): AxiosRateLimiter;
+    prototype: AxiosRateLimiter;
+}
 
  /**
   * Apply rate limit to axios instance.
@@ -75,5 +72,19 @@ declare function axiosRateLimit<T = AxiosInstance>(
     axiosInstance: T,
     options?: rateLimitOptions & { rateLimiter?: AxiosRateLimiter }
 ): RateLimitedAxiosInstance<T>;
+
+declare namespace axiosRateLimit {
+    export {
+        RateLimitRequestHandler,
+        RateLimiter,
+        RateLimitedAxiosInstance,
+        RateLimitEntry,
+        Queue,
+        rateLimitOptions,
+        AxiosRateLimiterConstructor,
+    };
+    export const AxiosRateLimiter: AxiosRateLimiterConstructor;
+    export function getLimiter(options: rateLimitOptions): AxiosRateLimiter;
+}
 
 export = axiosRateLimit;

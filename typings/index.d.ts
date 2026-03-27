@@ -31,7 +31,8 @@ type rateLimitOptions = {
     maxRPS?: number,
     duration?: string | number,
     limits?: RateLimitEntry[],
-    queue?: Queue
+    queue?: Queue,
+    shouldCountRequest?: (config: any, response: any) => boolean
 };
 
 interface AxiosRateLimiter extends RateLimiter {

@@ -39,6 +39,7 @@ See [source code](https://github.com/aishek/axios-rate-limit/blob/master/src/ind
 - [Multiple rate limits](doc/use-case-multiple-rate-limits.md) — API enforces several limits (e.g. per second and per minute); use multiple windows.
 - [Custom queue](doc/use-case-custom-queue.md) — Pass your own queue (e.g. to log when requests are added or removed).
 - [Retrying failed requests](doc/use-case-retry-failed-requests.md) — Use with axios-retry to rate-limit and retry failed requests (see [issue #24](https://github.com/aishek/axios-rate-limit/issues/24)).
+- [Integration with axios-cache-adapter](doc/use-case-axios-cache-adapter.md) — Don't count cached responses toward the limit (see [issue #43](https://github.com/aishek/axios-rate-limit/issues/43)).
 - [Mocking in Jest](doc/jest-mocking.md) — How to mock axios-rate-limit in Jest so tests do not hit the network (see [issue #51](https://github.com/aishek/axios-rate-limit/issues/51)).
 - [Shared limiter](doc/use-case-shared-rate-limiter.md) — Reuse one limiter instance across multiple axios clients that share the same API quota.
 

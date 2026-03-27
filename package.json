@@ -33,7 +33,8 @@
     "husky": "^1.3.1",
     "jest": "^24.7.1",
     "lint-staged": "^8.1.5",
-    "sinon": "^7.3.2"
+    "sinon": "^7.3.2",
+    "typescript": "^5.0"
   },
   "peerDependencies": {
     "axios": "*"
@@ -47,7 +48,8 @@
   "scripts": {
     "watch": "jest --watch",
     "test": "jest --forceExit --runInBand --coverage --detectOpenHandles",
-    "lint": "eslint-ci src/*.js __tests__/*.js"
+    "lint": "eslint-ci src/*.js __tests__/*.js",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.typecheck.node.json --noEmit && tsc -p tsconfig.typecheck.nodenext.json --noEmit && tsc -p tsconfig.typecheck.bundler.json --noEmit"
   },
   "jest": {
     "testPathIgnorePatterns": ["/__tests__/helpers\\.js$"],

@@ -31,7 +31,48 @@ http.get('https://example.com/api/v1/users.json?page=1')
 http.getQueue()
 ```
 
-See [source code](https://github.com/aishek/axios-rate-limit/blob/master/src/index.js#L233-L258) for all available options.
+## Options
+
+### Recommended: `limits` (multi-window)
+
+`limits` is the recommended format. It accepts an array of independent fixed windows, and a request is executed only when all windows allow it.
+
+```javascript
+const http = rateLimit(axios.create(), {
+  limits: [
+    { maxRequests: 100, duration: '1m' },
+    { maxRequests: 10, duration: '1s' }
+  ]
+})
+```
+
+Each `limits[]` entry:
+
+- `maxRequests` (number, required, > 0): max requests per window.
+- `duration` (string or number, required, > 0): window size. If a number is provided, it is interpreted as milliseconds (`duration: 1500` means 1.5 seconds). Strings support `ms`, `s`, `m`, `h` (examples: `'500ms'`, `'2s'`, `'1m'`).
+
+### Advanced options
+
+- `queue` (optional): custom queue implementation. Must support `push(item)` and `shift()`, and either `length` or `getLength()`. Sync and async queues are supported.
+- `shouldCountRequest` (optional): predicate `(config, response) => boolean`. If it returns `false`, the limiter refunds one occupied slot (useful for cached responses).
+- `rateLimiter` (optional): lets you pass an existing limiter instance, so multiple axios clients can share one quota.
+
+### Runtime API
+
+Returned axios instance methods:
+
+- `getQueue()`: returns current queue instance.
+- `getMaxRPS()`: returns first window RPS view (`maxRequests / (durationInMs / 1000)`), or `0` when limiter is not configured.
+- `setRateLimitOptions(options)`: updates limiter options at runtime.
+- `setMaxRPS(rps)`: shorthand runtime update equivalent to `setRateLimitOptions({ maxRequests: rps, perMilliseconds: 1000 })`.
+
+Also available from module:
+
+- `rateLimit.getLimiter(options)`: creates a limiter instance that can be shared across axios clients.
+
+### Legacy single-window options
+
+Single-window constructor shape (`maxRequests` with one of `perMilliseconds`, `duration`, or `maxRPS`) is still supported for compatibility. For new code, prefer `limits[]` format.
 
 ## Typical use cases
 

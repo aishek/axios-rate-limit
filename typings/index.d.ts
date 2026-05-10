@@ -32,7 +32,9 @@ type rateLimitOptions = {
     duration?: string | number,
     limits?: RateLimitEntry[],
     queue?: Queue,
-    shouldCountRequest?: (config: any, response: any) => boolean
+    shouldCountRequest?: (config: any, response: any) => boolean,
+    onResponseRateLimit?: (config: any, response: any, error?: any) => rateLimitOptions | void,
+    autoRateLimitByHeaders?: boolean
 };
 
 interface AxiosRateLimiter extends RateLimiter {
@@ -86,6 +88,7 @@ declare namespace axiosRateLimit {
     };
     export const AxiosRateLimiter: AxiosRateLimiterConstructor;
     export function getLimiter(options: rateLimitOptions): AxiosRateLimiter;
+    export function getHeaderBasedRateLimitOptions(config: any, response: any): rateLimitOptions | null;
 }
 
 export = axiosRateLimit;

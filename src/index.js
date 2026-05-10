@@ -103,13 +103,96 @@ function isAsyncQueue (queue) {
   return typeof queue.getLength === 'function'
 }
 
+function hasOwn (obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key)
+}
+
+function hasExplicitRateLimitOptions (options) {
+  if (!options) return false
+  return (
+    hasOwn(options, 'limits') ||
+    hasOwn(options, 'maxRequests') ||
+    hasOwn(options, 'perMilliseconds') ||
+    hasOwn(options, 'maxRPS') ||
+    hasOwn(options, 'duration')
+  )
+}
+
+function normalizeHeaders (headers) {
+  var normalized = {}
+  if (!headers) return normalized
+  var keys = Object.keys(headers)
+  for (var i = 0; i < keys.length; i++) {
+    normalized[keys[i].toLowerCase()] = headers[keys[i]]
+  }
+  return normalized
+}
+
+function getHeaderValue (headers, names) {
+  for (var i = 0; i < names.length; i++) {
+    var value = headers[names[i]]
+    if (value != null && value !== '') return value
+  }
+  return null
+}
+
+function parsePositiveNumber (value) {
+  var num = Number(value)
+  if (!isFinite(num) || num <= 0) return null
+  return num
+}
+
+function getResetMs (resetRaw) {
+  var reset = parsePositiveNumber(resetRaw)
+  if (reset == null) return null
+  var nowSeconds = Date.now() / 1000
+  var deltaSeconds = reset >= 1000000000 ? (reset - nowSeconds) : reset
+  if (!isFinite(deltaSeconds)) return null
+  return Math.max(1, Math.ceil(Math.max(0, deltaSeconds) * 1000))
+}
+
+function getHeaderBasedRateLimitOptions (config, response) {
+  if (!response || !response.headers) return null
+  var headers = normalizeHeaders(response.headers)
+  var limitRaw = getHeaderValue(headers, [
+    'x-ratelimit-limit',
+    'x-rate-limit-limit',
+    'ratelimit-limit'
+  ])
+  var resetRaw = getHeaderValue(headers, [
+    'x-ratelimit-reset',
+    'x-rate-limit-reset',
+    'ratelimit-reset'
+  ])
+  var remainingRaw = getHeaderValue(headers, [
+    'x-ratelimit-remaining',
+    'x-rate-limit-remaining',
+    'ratelimit-remaining'
+  ])
+  var limit = parsePositiveNumber(limitRaw)
+  var perMs = getResetMs(resetRaw)
+  if (limit == null || perMs == null) return null
+  if (remainingRaw != null) {
+    var remaining = Number(remainingRaw)
+    if (!isFinite(remaining)) return null
+  }
+  return {
+    maxRequests: limit,
+    perMilliseconds: perMs
+  }
+}
+
 function AxiosRateLimit (queue) {
   this.queue = queue
   this.windows = []
   this._shiftPromise = Promise.resolve()
+  this._headerAutoEnabled = true
+  this._hasExplicitRateLimitOptions = false
+  this._onResponseRateLimit = null
 
   this.handleRequest = this.handleRequest.bind(this)
   this.handleResponse = this.handleResponse.bind(this)
+  this.handleErrorResponse = this.handleErrorResponse.bind(this)
 }
 
 AxiosRateLimit.prototype.getMaxRPS = function () {
@@ -129,9 +212,62 @@ AxiosRateLimit.prototype.setMaxRPS = function (rps) {
   })
 }
 
-AxiosRateLimit.prototype.setRateLimitOptions = function (options) {
+AxiosRateLimit.prototype._getResolvedOnResponseRateLimit = function () {
+  if (typeof this._onResponseRateLimit === 'function') {
+    return this._onResponseRateLimit
+  }
+  if (!this._headerAutoEnabled || this._hasExplicitRateLimitOptions) {
+    return null
+  }
+  return getHeaderBasedRateLimitOptions
+}
+
+AxiosRateLimit.prototype._isSameSingleWindow = function (options) {
+  if (!options || options.limits) return false
+  var hasMax = hasOwn(options, 'maxRequests')
+  var hasPer = (
+    hasOwn(options, 'perMilliseconds') ||
+    hasOwn(options, 'duration') ||
+    hasOwn(options, 'maxRPS')
+  )
+  if (!hasMax || !hasPer) return false
+  if (this.windows.length !== 1) return false
+  var candidate = buildWindows(options)
+  var current = this.windows[0]
+  var maxMatches = candidate[0].max === current.max
+  var perMsMatches = candidate[0].perMs === current.perMs
+  return maxMatches && perMsMatches
+}
+
+AxiosRateLimit.prototype.setRateLimitOptions = function (options, meta) {
   if (!options) return
+  var context = meta || {}
   this._shouldCountRequest = options.shouldCountRequest
+  if (hasOwn(options, 'onResponseRateLimit')) {
+    this._onResponseRateLimit = options.onResponseRateLimit
+  }
+  if (hasOwn(options, 'autoRateLimitByHeaders')) {
+    this._headerAutoEnabled = options.autoRateLimitByHeaders !== false
+  }
+  if (context.fromAuto !== true && hasExplicitRateLimitOptions(options)) {
+    this._hasExplicitRateLimitOptions = true
+  }
+  if (context.fromAuto === true && this._hasExplicitRateLimitOptions) {
+    return
+  }
+  if (context.fromAuto === true && this._isSameSingleWindow(options)) {
+    return
+  }
+  if (!hasExplicitRateLimitOptions(options)) {
+    var hasOnlyBehaviorOptions = (
+      hasOwn(options, 'shouldCountRequest') ||
+      hasOwn(options, 'onResponseRateLimit') ||
+      hasOwn(options, 'autoRateLimitByHeaders')
+    )
+    if (hasOnlyBehaviorOptions) return
+    buildWindows(options)
+    return
+  }
   var newWindows = buildWindows(options)
   clearWindowsTimeouts(this.windows)
   this.windows = newWindows
@@ -142,8 +278,7 @@ AxiosRateLimit.prototype.enable = function (axios) {
   var self = this
 
   function handleError (error) {
-    self.shift().catch(function () {})
-    return Promise.reject(error)
+    return self.handleErrorResponse(error)
   }
 
   axios.interceptors.request.use(
@@ -222,7 +357,37 @@ AxiosRateLimit.prototype.handleResponse = function (response) {
       }
     } catch (e) {}
   }
+  var onResponseRateLimit = self._getResolvedOnResponseRateLimit()
+  if (typeof onResponseRateLimit === 'function') {
+    try {
+      var nextOptions = onResponseRateLimit(response.config, response, null)
+      if (nextOptions && !self._isSameSingleWindow(nextOptions)) {
+        self.setRateLimitOptions(nextOptions, { fromAuto: true })
+      }
+    } catch (e) {}
+  }
   return Promise.resolve(self.shift()).then(function () { return response })
+}
+
+AxiosRateLimit.prototype.handleErrorResponse = function (error) {
+  var self = this
+  var response = error && error.response
+  var config = error && error.config
+  if (response && response.config) {
+    config = response.config
+  }
+  var onResponseRateLimit = self._getResolvedOnResponseRateLimit()
+  if (typeof onResponseRateLimit === 'function') {
+    try {
+      var nextOptions = onResponseRateLimit(config, response, error)
+      if (nextOptions && !self._isSameSingleWindow(nextOptions)) {
+        self.setRateLimitOptions(nextOptions, { fromAuto: true })
+      }
+    } catch (e) {}
+  }
+  return Promise.resolve(self.shift()).then(function () {
+    return Promise.reject(error)
+  })
 }
 
 AxiosRateLimit.prototype.shiftInitial = function () {
@@ -349,6 +514,7 @@ function getLimiter (options) {
 }
 
 axiosRateLimit._clearWindowsTimeouts = clearWindowsTimeouts
+axiosRateLimit.getHeaderBasedRateLimitOptions = getHeaderBasedRateLimitOptions
 module.exports = axiosRateLimit
 module.exports.AxiosRateLimiter = AxiosRateLimit
 module.exports.getLimiter = getLimiter

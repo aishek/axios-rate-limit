@@ -81,6 +81,7 @@ Single-window constructor shape (`maxRequests` with one of `perMilliseconds`, `d
 - [Custom queue](doc/use-case-custom-queue.md) — Pass your own queue (e.g. to log when requests are added or removed).
 - [Retrying failed requests](doc/use-case-retry-failed-requests.md) — Use with axios-retry to rate-limit and retry failed requests (see [issue #24](https://github.com/aishek/axios-rate-limit/issues/24)).
 - [Integration with axios-cache-adapter](doc/use-case-axios-cache-adapter.md) — Don't count cached responses toward the limit (see [issue #43](https://github.com/aishek/axios-rate-limit/issues/43)).
+- [Change RPS on the fly](doc/use-case-change-rps-on-the-fly.md) — Update `setMaxRPS`/`setRateLimitOptions` at runtime and speed up queued cancellation handling (see [issue #48](https://github.com/aishek/axios-rate-limit/issues/48)).
 - [Mocking in Jest](doc/jest-mocking.md) — How to mock axios-rate-limit in Jest so tests do not hit the network (see [issue #51](https://github.com/aishek/axios-rate-limit/issues/51)).
 - [Shared limiter](doc/use-case-shared-rate-limiter.md) — Reuse one limiter instance across multiple axios clients that share the same API quota.
 

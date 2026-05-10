@@ -171,3 +171,42 @@ it('not delay requests if requests are aborted via signal', async function () {
   expect(end - start).toBeLessThan(perMilliseconds * 2)
   expect(end - start).toBeGreaterThanOrEqual(perMilliseconds)
 })
+
+it('setMaxRPS speeds queued cancels (issue 48)', async function () {
+  var totalRequests = 50
+  function adapter (config) { return Promise.resolve(config) }
+
+  var http = axiosRateLimit(
+    axios.create({ adapter: adapter }),
+    { maxRPS: 1 }
+  )
+
+  var onSuccess = sinon.spy()
+  var onFailure = sinon.spy()
+  var cancelSources = []
+  var requests = []
+
+  for (var i = 0; i < totalRequests; i++) {
+    var source = axios.CancelToken.source()
+    cancelSources.push(source)
+    requests.push(
+      http.get('/users', { cancelToken: source.token })
+        .then(onSuccess)
+        .catch(onFailure)
+    )
+  }
+
+  await Promise.resolve()
+  var start = Date.now()
+  http.setMaxRPS(100000)
+  for (var x = 1; x < cancelSources.length; x++) {
+    cancelSources[x].cancel('cancelled for testing')
+  }
+
+  await Promise.all(requests)
+  var end = Date.now()
+
+  expect(onSuccess.callCount).toEqual(1)
+  expect(onFailure.callCount).toEqual(totalRequests - 1)
+  expect(end - start).toBeLessThan(500)
+})

@@ -345,6 +345,20 @@ AxiosRateLimit.prototype.handleRequest = function (request) {
   })
 }
 
+// Handle response rate limit adaptation
+AxiosRateLimit.prototype._handleResponseRateLimit = function (config, response, error) {
+  var self = this
+  var onResponseRateLimit = self._getResolvedOnResponseRateLimit()
+  if (typeof onResponseRateLimit === 'function') {
+    try {
+      var nextOptions = onResponseRateLimit(config, response, error)
+      if (nextOptions && !self._isSameSingleWindow(nextOptions)) {
+        self.setRateLimitOptions(nextOptions, { fromAuto: true })
+      }
+    } catch (e) {}
+  }
+}
+
 AxiosRateLimit.prototype.handleResponse = function (response) {
   var self = this
   if (typeof self._shouldCountRequest === 'function') {
@@ -357,15 +371,7 @@ AxiosRateLimit.prototype.handleResponse = function (response) {
       }
     } catch (e) {}
   }
-  var onResponseRateLimit = self._getResolvedOnResponseRateLimit()
-  if (typeof onResponseRateLimit === 'function') {
-    try {
-      var nextOptions = onResponseRateLimit(response.config, response, null)
-      if (nextOptions && !self._isSameSingleWindow(nextOptions)) {
-        self.setRateLimitOptions(nextOptions, { fromAuto: true })
-      }
-    } catch (e) {}
-  }
+  self._handleResponseRateLimit(response.config, response, null)
   return Promise.resolve(self.shift()).then(function () { return response })
 }
 
@@ -376,15 +382,7 @@ AxiosRateLimit.prototype.handleErrorResponse = function (error) {
   if (response && response.config) {
     config = response.config
   }
-  var onResponseRateLimit = self._getResolvedOnResponseRateLimit()
-  if (typeof onResponseRateLimit === 'function') {
-    try {
-      var nextOptions = onResponseRateLimit(config, response, error)
-      if (nextOptions && !self._isSameSingleWindow(nextOptions)) {
-        self.setRateLimitOptions(nextOptions, { fromAuto: true })
-      }
-    } catch (e) {}
-  }
+  self._handleResponseRateLimit(config, response, error)
   return Promise.resolve(self.shift()).then(function () {
     return Promise.reject(error)
   })

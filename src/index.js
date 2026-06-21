@@ -346,18 +346,19 @@ AxiosRateLimit.prototype.handleRequest = function (request) {
 }
 
 // Handle response rate limit adaptation
-AxiosRateLimit.prototype._handleResponseRateLimit = function (config, response, error) {
-  var self = this
-  var onResponseRateLimit = self._getResolvedOnResponseRateLimit()
-  if (typeof onResponseRateLimit === 'function') {
-    try {
-      var nextOptions = onResponseRateLimit(config, response, error)
-      if (nextOptions && !self._isSameSingleWindow(nextOptions)) {
-        self.setRateLimitOptions(nextOptions, { fromAuto: true })
-      }
-    } catch (e) {}
+AxiosRateLimit.prototype._handleResponseRateLimit =
+  function (config, response, error) {
+    var self = this
+    var onResponseRateLimit = self._getResolvedOnResponseRateLimit()
+    if (typeof onResponseRateLimit === 'function') {
+      try {
+        var nextOptions = onResponseRateLimit(config, response, error)
+        if (nextOptions && !self._isSameSingleWindow(nextOptions)) {
+          self.setRateLimitOptions(nextOptions, { fromAuto: true })
+        }
+      } catch (e) {}
+    }
   }
-}
 
 AxiosRateLimit.prototype.handleResponse = function (response) {
   var self = this

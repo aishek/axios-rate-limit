@@ -2,6 +2,7 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+* Add response-driven rate-limit adaptation via callback pipeline: new `onResponseRateLimit(config, response, error)` hook, `autoRateLimitByHeaders` toggle, and built-in header parser `getHeaderBasedRateLimitOptions(...)`. Header adaptation supports `X-RateLimit-*`, `X-Rate-Limit-*`, and `RateLimit-*` variants for `limit/reset`, processes both success and error responses, skips invalid headers, and avoids overriding explicit user-configured limits. Includes new docs for enabling/disabling this behavior (see [issue #77](https://github.com/aishek/axios-rate-limit/issues/77)).
 ## 1.9.0
 * Add `shouldCountRequest(config, response)` option: when it returns false the limiter refunds one slot (e.g. for cached responses). Enables integration with axios-cache-adapter so cache hits do not consume the rate limit. See [issue #43](https://github.com/aishek/axios-rate-limit/issues/43) and [doc/use-case-axios-cache-adapter.md](doc/use-case-axios-cache-adapter.md).
 

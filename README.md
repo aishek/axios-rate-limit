@@ -55,6 +55,8 @@ Each `limits[]` entry:
 
 - `queue` (optional): custom queue implementation. Must support `push(item)` and `shift()`, and either `length` or `getLength()`. Sync and async queues are supported.
 - `shouldCountRequest` (optional): predicate `(config, response) => boolean`. If it returns `false`, the limiter refunds one occupied slot (useful for cached responses).
+- `autoRateLimitByHeaders` (optional, default `true`): enables automatic single-window adaptation from response headers (`X-RateLimit-*`, `X-Rate-Limit-*`, `RateLimit-*`) when user rate limits are not explicitly configured.
+- `onResponseRateLimit` (optional): callback `(config, response, error) => rateLimitOptions | void` to customize how rate-limit headers are translated into runtime limiter options.
 - `rateLimiter` (optional): lets you pass an existing limiter instance, so multiple axios clients can share one quota.
 
 ### Runtime API
@@ -82,6 +84,8 @@ Single-window constructor shape (`maxRequests` with one of `perMilliseconds`, `d
 - [Retrying failed requests](doc/use-case-retry-failed-requests.md) — Use with axios-retry to rate-limit and retry failed requests (see [issue #24](https://github.com/aishek/axios-rate-limit/issues/24)).
 - [Integration with axios-cache-adapter](doc/use-case-axios-cache-adapter.md) — Don't count cached responses toward the limit (see [issue #43](https://github.com/aishek/axios-rate-limit/issues/43)).
 - [Change RPS on the fly](doc/use-case-change-rps-on-the-fly.md) — Update `setMaxRPS`/`setRateLimitOptions` at runtime and speed up queued cancellation handling (see [issue #48](https://github.com/aishek/axios-rate-limit/issues/48)).
+- [Auto-adapt from rate-limit headers](doc/use-case-x-ratelimit-headers.md) — Use header-driven runtime adaptation via shared callback pipeline, including custom parsing and priority with explicit user limits (see [issue #77](https://github.com/aishek/axios-rate-limit/issues/77)).
+- [Disable header auto-adaptation](doc/use-case-disable-x-ratelimit-auto-sync.md) — Explicitly turn off automatic adaptation and keep only manually controlled limits.
 - [Mocking in Jest](doc/jest-mocking.md) — How to mock axios-rate-limit in Jest so tests do not hit the network (see [issue #51](https://github.com/aishek/axios-rate-limit/issues/51)).
 - [Shared limiter](doc/use-case-shared-rate-limiter.md) — Reuse one limiter instance across multiple axios clients that share the same API quota.
 
